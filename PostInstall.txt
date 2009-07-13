@@ -1,0 +1,12 @@
+
+For more information on ruote-amqp, see http://github.com/kennethkalmer/ruote-amqp
+
+Please note that this gem requires access to an AMQP broker and a good 
+understanding of AMQP and remote participants in general.
+
+Join us in #ruote on Freenode or on the openwfe-users Google Group to discuss
+it's uses.
+
+You might also want to look at daemon-kit for help with writing external
+participants that communicate with ruote via AMQP.
+
