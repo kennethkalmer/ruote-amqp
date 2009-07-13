@@ -2,9 +2,9 @@ module RuoteAMQP
 
   # = AMQP Participants
   #
-  # The AMQPParticipant allows you to send workitems (serialized as
+  # The RuoteAMQP::Participant allows you to send workitems (serialized as
   # JSON) or messages to any AMQP queues right from the process
-  # definition. When combined with the AMQPListener you can easily
+  # definition. When combined with the RuoteAMQP::Listener you can easily
   # leverage an extremely powerful local/remote participant
   # combinations.
   #
@@ -30,12 +30,12 @@ module RuoteAMQP
   # Setting up the participant
   #
   #   engine.register_participant(
-  #     :amqp, OpenWFE::Extras::AMQPParticipant )
+  #     :amqp, RuoteAMQP::Participant )
   #
   # Setup a participant that always replies to the engine
   #
   #   engine.register_participant(
-  #     :amp, OpenWFE::Extras::AMQPParticipant.new(:reply_by_default => true ) )
+  #     :amqp, RuoteAMQP::Participant.new(:reply_by_default => true ) )
   #
   # Sending a message example
   #
@@ -63,13 +63,41 @@ module RuoteAMQP
   #
   # When waiting for a reply it only makes sense to send a workitem.
   #
+  # Keeping things DRY with participant name to queue maps:
+  #
+  #   amqp = RuoteAMQP::Participant.new( :default_queue => 'test' )
+  #   amqp.map_participant 'george', 'whitehouse'
+  #   amqp.map_participant 'barak', 'whitehouse'
+  #   amqp.map_participant 'greenspan', 'treasury'
+  #
+  #   engine.register_participant( :george, amqp )
+  #   engine.register_participant( :barak, amqp )
+  #   engine.register_participant( :greespan, amqp )
+  #   engine.register_participant( :amqp, amqp )
+  #
+  #   class DryAmqProcess0 < OpenWFE::ProcessDefinition
+  #     cursor :break_if => "${f:economy_recovered}" do
+  #       # Workitem sent to 'whitehouse' queue
+  #       george :activity => 'Tank economy'
+  #
+  #       # Workitem sent to 'treasury' queue
+  #       greenspan :activity => 'Resign'
+  #
+  #       # Workitem sent to 'whitehouse' queue
+  #       barak :activity => 'Cleanup mess'
+  #
+  #       # Workitem sent to default 'test' queue
+  #       amqp :activity => 'Notify CNN'
+  #     end
+  #   end
+  #
   # == Workitem modifications
   #
   # To ease replies, and additional workitem attribute is set:
   #
   #   'reply_queue'
   #
-  # +reply_queue+ has the name of the queue where the AMQPListener
+  # +reply_queue+ has the name of the queue where the RuoteAMQP::Listener
   # expects replies from remote participants
   #
   # == AMQP notes
@@ -87,12 +115,20 @@ module RuoteAMQP
     # Accepts an options hash with the following keys:
     #
     # * :reply_by_default => (bool) false by default
+    # * :default_queue => (string) nil by default
     def initialize( options = {} )
       ensure_reactor!
 
       @options = {
-        :reply_by_default => false
+        :reply_by_default => false,
+        :default_queue => nil
       }.merge( options )
+
+      @participant_maps = {}
+    end
+
+    def map_participant( name, queue )
+      @participant_maps[ name ] = queue
     end
 
     # Process the workitem at hand. By default the workitem will be
@@ -106,7 +142,7 @@ module RuoteAMQP
       ldebug { "consuming workitem" }
       ensure_reactor!
 
-      if target_queue = workitem.params['queue']
+      if target_queue = determine_queue( workitem )
 
         q = MQ.queue( target_queue, :durable => true )
 
@@ -138,7 +174,13 @@ module RuoteAMQP
       @em_thread.join if @em_thread
     end
 
-    protected
+    private
+
+    def determine_queue( workitem )
+      workitem.params['queue'] ||
+      @participant_maps[ workitem.participant_name ] ||
+      @options[:default_queue]
+    end
 
     # Encode (and extend) the workitem as JSON
     def encode_workitem( wi )

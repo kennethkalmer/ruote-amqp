@@ -6,10 +6,10 @@ module RuoteAMQP
   #
   # = AMQP Listeners
   #
-  # Used in conjunction with the AMQPParticipant, the AMQPListener
+  # Used in conjunction with the RuoteAMQP::Participant, the Listener
   # subscribes to a specific direct exchange and monitors for
   # incoming workitems. It expects workitems to arrive serialized as
-  # JSON (prefered), XML or YAML.
+  # JSON.
   #
   # == Configuration
   #
@@ -27,12 +27,12 @@ module RuoteAMQP
   #
   # Register the listener with the engine:
   #
-  #   engine.register_listener( OpenWFE::Extras::AMQPListener )
+  #   engine.register_listener( RuoteAMQP::Listener )
   #
   # The listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
   #
-  # See the AMQPParticipany docs for information on sending
+  # See the RuoteAMQP::Participant docs for information on sending
   # workitems out to remote participants, and have them send replies
   # to the correct direct exchange specified in the workitem
   # attributes.
@@ -40,13 +40,13 @@ module RuoteAMQP
   class Listener < OpenWFE::Service
     include OpenWFE::WorkItemListener
 
-    # Listening queue
-    @@queue = 'ruote'
-
     class << self
 
+      # Listening queue
+      attr_writer :queue
+
       def queue
-        @@queue
+        @queue ||= 'ruote'
       end
 
     end
@@ -56,7 +56,7 @@ module RuoteAMQP
     def initialize( service_name, options )
 
       if q = options.delete(:queue)
-        @@queue = q
+        self.class.queue = q
       end
 
       super( service_name, options )
@@ -65,9 +65,9 @@ module RuoteAMQP
         @em_thread = Thread.new { EM.run } unless EM.reactor_running?
       #end
 
-      MQ.queue( @@queue, :durable => true ).subscribe do |message|
+      MQ.queue( self.class.queue, :durable => true ).subscribe do |message|
         workitem = decode_workitem( message )
-        ldebug { "workitem from '#{@@queue}': #{workitem.inspect}" }
+        ldebug { "workitem from '#{self.class.queue}': #{workitem.inspect}" }
         handle_item( workitem )
       end
     end

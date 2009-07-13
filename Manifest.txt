@@ -3,6 +3,7 @@ Manifest.txt
 PostInstall.txt
 README.rdoc
 Rakefile
+TODO.txt
 lib/ruote-amqp.rb
 lib/ruote-amqp/listener.rb
 lib/ruote-amqp/participant.rb

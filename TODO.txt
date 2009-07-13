@@ -1,0 +1,4 @@
+ruote-amqp TODO
+===============
+
+[ ] Launch processes over AMQP

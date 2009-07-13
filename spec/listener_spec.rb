@@ -29,7 +29,7 @@ describe RuoteAMQP::Listener do
 
         loop do
           break unless @msg.nil?
-          sleep 1
+          sleep 0.1
         end
       end
     rescue Timeout::Error
