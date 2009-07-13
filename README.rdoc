@@ -23,12 +23,30 @@ Please review the detailed RDOC in RuoteAMQP::Participant and Ruote::AMQP::Liste
 
 == REQUIREMENTS:
 
-* ruote[http://openwfe.rubyforge.org] 0.9.20 or later
+* ruote[http://openwfe.rubyforge.org] 0.9.21 or later
 * amqp[http://github.com/tmm1/amqp] 0.6.1 or later
 
-NOTE: It might be required that you build the amqp gem yourself
+NOTE: It might be required that you build the amqp gem yourself.
+
+ruote 0.9.21 is currently only available to build on your own since John 
+Mettraux is working tirelessly to ship ruote 2.0. To build your own ruote 
+0.9.21 gem run these commands:
+
+  $ git clone git://github.com/jmettraux/ruote.git
+  $ cd ruote
+  $ rake gem
+  $ sudo gem install pkg/ruote-0.9.21.gem
+
+Please note that this requires Rubygems 1.3.2 or newer to work
+
+If you're using ruote 0.9.20 and would like to use ruote-amqp, you can install
+ruote-amqp-0.9.20, like so:
+
+  $ sudo gem install ruote-amqp -v 0.9.20
 
 == INSTALL:
+
+Please be sure to have read the requirements section above
 
 * sudo gem install ruote-amqp
 

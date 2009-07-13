@@ -85,7 +85,7 @@ module RuoteAMQP
     def decode_workitem( msg )
       ldebug { "decoding workitem from: #{msg}" }
 
-      hash = JSON.parse(msg)
+      hash = OpenWFE::Json.decode(msg)
       OpenWFE.workitem_from_h( hash )
     end
   end

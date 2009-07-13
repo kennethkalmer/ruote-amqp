@@ -36,10 +36,10 @@ describe RuoteAMQP::Listener do
       violated "Timeout waiting for message"
     end
 
-    wi = OpenWFE::InFlowWorkItem.from_h( JSON.parse( @msg ) )
+    wi = OpenWFE::InFlowWorkItem.from_h( OpenWFE::Json.decode( @msg ) )
     wi.attributes['foo'] = "bar"
 
-    MQ.queue( wi.attributes['reply_queue'] ).publish( JSON.generate( wi.to_h ) )
+    MQ.queue( wi.attributes['reply_queue'] ).publish( OpenWFE::Json.encode( wi.to_h ) )
 
     wait( fei )
 

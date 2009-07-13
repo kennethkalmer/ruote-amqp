@@ -143,7 +143,7 @@ module RuoteAMQP
     # Encode (and extend) the workitem as JSON
     def encode_workitem( wi )
       wi.attributes['reply_queue'] = Listener.queue
-      JSON.generate( wi.to_h )
+      OpenWFE::Json.encode( wi.to_h )
     end
 
     def ensure_reactor!

@@ -5,21 +5,20 @@ begin
   require 'openwfe'
 rescue LoadError
   require 'rubygems'
-  gem 'ruote', '>= 0.9.20'
+  gem 'ruote', '>= 0.9.21'
   require 'openwfe'
 end
 require 'openwfe/version'
 
-if OpenWFE::OPENWFERU_VERSION < '0.9.20'
-  raise "ruote-amqp requires at least ruote-0.9.20"
+if OpenWFE::OPENWFERU_VERSION < '0.9.21'
+  raise "ruote-amqp requires at least ruote-0.9.21"
 end
 
 require 'yaml'
-require 'json'
 require 'mq'
 
 module RuoteAMQP
-  VERSION = '0.9.20'
+  VERSION = '0.9.21'
 
   autoload 'Participant', 'ruote-amqp/participant'
   autoload 'Listener',    'ruote-amqp/listener'
