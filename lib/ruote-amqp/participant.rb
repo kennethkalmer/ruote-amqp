@@ -107,7 +107,8 @@ module RuoteAMQP
   # and fanout exchanges as well.
   #
   # The direct exchanges are always marked as durable by the
-  # participant.
+  # participant, and messages are marked as persistent by default (see
+  # #RuoteAMQP)
   #
   class Participant
     include OpenWFE::LocalParticipant
@@ -149,12 +150,12 @@ module RuoteAMQP
         # Message or workitem?
         if message = ( workitem.attributes['message'] || workitem.params['message'] )
           ldebug { "sending message to queue: #{target_queue}" }
-          q.publish( message )
+          q.publish( message, :persistent => RuoteAMQP.use_persistent_messages? )
 
         else
           ldebug { "sending workitem to queue: #{target_queue}" }
 
-          q.publish( encode_workitem( workitem ) )
+          q.publish( encode_workitem( workitem ), :persistent => RuoteAMQP.use_persistent_messages? )
         end
       else
         lerror { "no queue in workitem params!" }

@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 describe RuoteAMQP::Listener do
-
   it "should handle replies" do
     pdef = <<-EOF
     class AmqpParticipant2 < OpenWFE::ProcessDefinition

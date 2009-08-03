@@ -16,6 +16,7 @@ script/destroy
 script/generate
 spec/listener_spec.rb
 spec/participant_spec.rb
+spec/ruote_amqp_spec.rb
 spec/spec.opts
 spec/spec_helper.rb
 tasks/rspec.rake

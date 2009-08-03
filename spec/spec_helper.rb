@@ -33,8 +33,8 @@ Spec::Runner.configure do |config|
         old_put(k, v)
       end
     end
-      #
-      # useful for tracking misuses of the application context
+    #
+    # useful for tracking misuses of the application context
 
     ac['__tracer'] = @tracer
     ac[:ruby_eval_allowed] = true
