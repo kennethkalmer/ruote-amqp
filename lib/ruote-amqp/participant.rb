@@ -111,7 +111,7 @@ module RuoteAMQP
   # #RuoteAMQP)
   #
   class Participant
-    include OpenWFE::LocalParticipant
+    include Ruote::LocalParticipant
 
     # Accepts an options hash with the following keys:
     #
@@ -140,37 +140,26 @@ module RuoteAMQP
     # To force the participant to reply to the engine, set the
     # +reply_anyway+ workitem parameter.
     def consume( workitem )
-      ldebug { "consuming workitem" }
-      ensure_reactor!
-
       if target_queue = determine_queue( workitem )
 
         q = MQ.queue( target_queue, :durable => true )
 
         # Message or workitem?
-        if message = ( workitem.attributes['message'] || workitem.params['message'] )
-          ldebug { "sending message to queue: #{target_queue}" }
+        if message = ( workitem.attributes['message'] || workitem.fields['params']['message'] )
           q.publish( message, :persistent => RuoteAMQP.use_persistent_messages? )
-
         else
-          ldebug { "sending workitem to queue: #{target_queue}" }
-
           q.publish( encode_workitem( workitem ), :persistent => RuoteAMQP.use_persistent_messages? )
         end
       else
-        lerror { "no queue in workitem params!" }
+        raise "no queue in workitem params!"
       end
 
-      if @options[:reply_by_default] || workitem.params['reply-anyway'] == true
+      if @options[:reply_by_default] || workitem.fields['params']['reply-anyway'] == true
         reply_to_engine( workitem )
       end
-
-      ldebug { "done" }
     end
 
     def stop
-      linfo { "Stopping..."  }
-
       AMQP.stop { EM.stop } #if EM.reactor_running? }
       @em_thread.join if @em_thread
     end
@@ -178,15 +167,15 @@ module RuoteAMQP
     private
 
     def determine_queue( workitem )
-      workitem.params['queue'] ||
+      workitem.fields['params']['queue'] ||
       @participant_maps[ workitem.participant_name ] ||
       @options[:default_queue]
     end
 
     # Encode (and extend) the workitem as JSON
     def encode_workitem( wi )
-      wi.attributes['reply_queue'] = Listener.queue
-      OpenWFE::Json.encode( wi.to_h )
+      wi.fields['params']['reply_queue'] = Listener.queue
+      wi.to_h.to_json
     end
 
     def ensure_reactor!
