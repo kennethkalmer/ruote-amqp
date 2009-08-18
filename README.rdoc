@@ -23,7 +23,7 @@ Please review the detailed RDOC in RuoteAMQP::Participant and Ruote::AMQP::Liste
 
 == REQUIREMENTS:
 
-* ruote[http://openwfe.rubyforge.org] 0.9.21 or later
+* ruote[http://ruote.rubyforge.org] 2.0.0 or later
 * amqp[http://github.com/tmm1/amqp] 0.6.1 or later
 
 NOTE: It might be required that you build the amqp gem yourself.

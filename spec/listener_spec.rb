@@ -1,8 +1,10 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 describe RuoteAMQP::Listener do
+
   it "should handle replies" do
-    pdef = Ruote.process_definition :name => 'amqpParticipant2' do
+
+    pdef = Ruote.process_definition :name => 'test' do
       set :field => 'foo', :value => 'foo'
       sequence do
         echo '${f:foo}'
@@ -31,7 +33,7 @@ describe RuoteAMQP::Listener do
       violated "Timeout waiting for message"
     end
 
-    wi = OpenWFE::InFlowWorkItem.from_h( OpenWFE::Json.decode( @msg ) )
+    wi = Ruote::Workitem.from_h( OpenWFE::Json.decode( @msg ) )
     wi.attributes['foo'] = "bar"
 
     MQ.queue( wi.attributes['reply_queue'] ).publish( OpenWFE::Json.encode( wi.to_h ) )
@@ -46,3 +48,4 @@ describe RuoteAMQP::Listener do
     purge_engine
   end
 end
+

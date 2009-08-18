@@ -112,6 +112,7 @@ module RuoteAMQP
   #
   class Participant
 
+    include Ruote::EngineContext
     include Ruote::LocalParticipant
 
     # Accepts an options hash with the following keys:

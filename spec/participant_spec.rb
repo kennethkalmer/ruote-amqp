@@ -3,7 +3,8 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe RuoteAMQP::Participant, :type => :ruote do
 
   it "should support 'reply anyway' on expression parameter" do
-    pdef = Ruote.process_definition :name => 'AmqpParticipant0' do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
         amqp :queue => 'test1', 'reply_anyway' => true
         echo 'done.'
@@ -34,7 +35,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
   end
 
   it "should support 'reply anyway' as participant configuration" do
-    pdef = Ruote.process_definition :name => 'amqpParticipant0' do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
         amqp :queue => 'test4'
         echo 'done.'
@@ -66,7 +68,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
   end
 
   it "should support custom messages instead of workitems" do
-    pdef = Ruote.process_definition :name => 'amqpParticipant1' do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
         amqp :queue => 'test2', :message => 'foo', 'reply_anyway' => true
         echo 'done.'
@@ -97,7 +100,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
   end
 
   it "should support a default queue name" do
-    pdef = Ruote.process_definition :name => 'amqpParticipant0' do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
         amqp 'reply_anyway' => true
         echo 'done.'
@@ -127,7 +131,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
   end
 
   it "should support mapping participant names to queue names" do
-    pdef = Ruote.process_definition :name => 'amqpParticipant0' do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
         q1
         q2

@@ -9,10 +9,15 @@ end
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 $:.unshift('../ruote/lib')
 
+require 'fileutils'
+require 'json'
+
 require 'ruote/engine'
+require 'ruote/log/test_logger'
+
 require 'ruote-amqp'
 require 'spec/ruote'
-require 'fileutils'
+
 
 # AMQP magic worked here
 AMQP.settings[:host]  = '172.16.133.50'
@@ -29,34 +34,13 @@ Spec::Runner.configure do |config|
 
     ac = {}
 
-    class << ac
-      alias :old_put :[]=
-      def []= (k, v)
-        raise("!!!!! #{k.class}\n#{k.inspect}") \
-          if k.class != String and k.class != Symbol
-        old_put(k, v)
-      end
-    end
-    #
-    # useful for tracking misuses of the application context
-
-    ac['__tracer'] = @tracer
+    ac[:s_tracer] = @tracer
     ac[:ruby_eval_allowed] = true
     ac[:definition_in_launchitem_allowed] = true
 
     @engine = ::Ruote::Engine.new( ac )
-    #ENV['DEBUG'] = nil
 
-    #@terminated_processes = []
-    #@engine.get_expression_pool.add_observer(:terminate) do |c, fe, wi|
-    #  @terminated_processes << fe.fei.wfid
-    #  #p [ :terminated, @terminated_processes ]
-    #end
-
-    if ENV['DEBUG']
-      $OWFE_LOG = Logger.new( STDOUT )
-      $OWFE_LOG.level = Logger::DEBUG
-    end
+    @engine.add_service( :s_logger, ::Ruote::TestLogger )
   end
 
   config.after(:each) do
