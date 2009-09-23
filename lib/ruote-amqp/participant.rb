@@ -165,6 +165,9 @@ module RuoteAMQP
       @em_thread.join if @em_thread
     end
 
+    def cancel(fei, flavour)
+    end
+ 
     private
 
     def determine_queue( workitem )
