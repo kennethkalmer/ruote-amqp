@@ -35,6 +35,7 @@ module RuoteAMQP
   # attributes.
   #
   class Listener
+
     include Ruote::EngineContext
 
     class << self

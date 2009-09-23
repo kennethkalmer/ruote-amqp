@@ -7,11 +7,15 @@ rescue LoadError
 end
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
+$:.unshift('../ruote/lib')
+
+require 'ruote/engine'
 require 'ruote-amqp'
 require 'spec/ruote'
 require 'fileutils'
 
 # AMQP magic worked here
+AMQP.settings[:host]  = '172.16.133.50'
 AMQP.settings[:vhost] = '/ruote-test'
 AMQP.settings[:user]  = 'ruote'
 AMQP.settings[:pass]  = 'ruote'
@@ -40,13 +44,14 @@ Spec::Runner.configure do |config|
     ac[:ruby_eval_allowed] = true
     ac[:definition_in_launchitem_allowed] = true
 
-    @engine = OpenWFE::Engine.new( ac )
+    @engine = ::Ruote::Engine.new( ac )
+    #ENV['DEBUG'] = nil
 
-    @terminated_processes = []
-    @engine.get_expression_pool.add_observer(:terminate) do |c, fe, wi|
-      @terminated_processes << fe.fei.wfid
-      #p [ :terminated, @terminated_processes ]
-    end
+    #@terminated_processes = []
+    #@engine.get_expression_pool.add_observer(:terminate) do |c, fe, wi|
+    #  @terminated_processes << fe.fei.wfid
+    #  #p [ :terminated, @terminated_processes ]
+    #end
 
     if ENV['DEBUG']
       $OWFE_LOG = Logger.new( STDOUT )

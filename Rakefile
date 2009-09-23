@@ -2,7 +2,6 @@ require 'rubygems'
 gem 'hoe', '>= 2.1.0'
 require 'hoe'
 require 'fileutils'
-require './lib/ruote-amqp'
 
 Hoe.plugin :newgem
 # Hoe.plugin :website

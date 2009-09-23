@@ -18,7 +18,7 @@ module RuoteSpecHelpers
 
   def wait( fei )
     Thread.pass
-    return if @terminated_processes.include?( fei.wfid )
+    return if @terminated_processes.include?( fei )
     @engine.wait_for( fei )
   end
 end
