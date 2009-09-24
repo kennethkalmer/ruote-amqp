@@ -28,27 +28,48 @@ Please review the detailed RDOC in RuoteAMQP::Participant and Ruote::AMQP::Liste
 
 NOTE: It might be required that you build the amqp gem yourself.
 
-ruote 0.9.21 is currently only available to build on your own since John 
-Mettraux is working tirelessly to ship ruote 2.0. To build your own ruote 
-0.9.21 gem run these commands:
+ruote 2.0.0 is currently only available to build on your own since John 
+Mettraux is working tirelessly to ship a stableruote 2.0. To build your own ruote 
+2.0.0 gem run these commands:
 
   $ git clone git://github.com/jmettraux/ruote.git
   $ cd ruote
+  $ git checkout ruote2.0
   $ rake gem
-  $ sudo gem install pkg/ruote-0.9.21.gem
+  $ sudo gem install pkg/ruote-2.0.0.gem
 
 Please note that this requires Rubygems 1.3.2 or newer to work
-
-If you're using ruote 0.9.20 and would like to use ruote-amqp, you can install
-ruote-amqp-0.9.20, like so:
-
-  $ sudo gem install ruote-amqp -v 0.9.20
 
 == INSTALL:
 
 Please be sure to have read the requirements section above
 
 * sudo gem install ruote-amqp
+
+== TESTS:
+
+To run the tests you need the following requirements met, or the testing environment
+will fail horribly.
+
+=== kennethkalmer-amqp
+
+* kennethkalmer-amqp[http://github.com/kennethkalmer/amqp] 0.6.4
+
+It contains a one-line patch as per tmm1's instructions in #eventmachine, which
+allows the reactor to be stopped and started several times in a running Ruby
+process.
+
+=== RabbitMQ vhost
+
+The tests use dedicated vhost on a running AMQP broker. To configure RabbitMQ
+you can run the following commands:
+
+  # rabbitmqctl add_vhost /ruote-test
+  # rabbitmqctl add_user ruote ruote
+  # rabbitmqctl set_permissions -p /ruote-test ruote '.*' '.*' '.*'
+
+If you need to change the AMQP configuration used by the tests, edit the
++spec/spec_helper.rb+ file.
 
 == DAEMON-KIT:
 
@@ -58,6 +79,8 @@ to write your remote participants.
 
 daemon-kit offers plenty of convenience for remote participants and includes
 a code generator for ruote remote participants.
+
+DaemonKit doesn't currently support ruote 2.0, support is forthcoming.
 
 == LICENSE:
 
