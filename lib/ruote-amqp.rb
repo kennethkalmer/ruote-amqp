@@ -29,5 +29,18 @@ module RuoteAMQP
       @use_persistent_messages = true if @use_persistent_messages.nil?
       @use_persistent_messages
     end
+
+    def ensure_reactor! #:nodoc:
+      Thread.main[:ruote_amqp_reactor] = Thread.new { EM.run } unless EM.reactor_running?
+    end
+
+    def shutdown_reactor! #:nodoc:
+      if reactor_thread = Thread.main[:ruote_amqp_reactor]
+        AMQP.stop { EM.stop }
+        sleep 0.001 while EM.reactor_running?
+      else
+        AMQP.stop
+      end
+    end
   end
 end

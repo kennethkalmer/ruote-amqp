@@ -47,8 +47,7 @@ Spec::Runner.configure do |config|
 
   config.after(:each) do
     @engine.stop
-    AMQP.stop { EM.stop }
-    sleep 0.001 while EM.reactor_running?
+    RuoteAMQP.shutdown_reactor!
   end
 
   config.after(:all) do

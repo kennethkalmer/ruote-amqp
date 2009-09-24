@@ -55,9 +55,7 @@ module RuoteAMQP
         self.class.queue = q
       end
 
-      #if AMQP.connection.nil?
-        @em_thread = Thread.new { EM.run } unless EM.reactor_running?
-      #end
+      RuoteAMQP.ensure_reactor!
 
       MQ.queue( self.class.queue, :durable => true ).subscribe do |message|
         workitem = decode_workitem( message )
@@ -66,8 +64,7 @@ module RuoteAMQP
     end
 
     def stop
-      AMQP.stop { EM.stop } #if EM.reactor_running? }
-      @em_thread.join if @em_thread
+      RuoteAMQP.shutdown_reactor!
     end
 
     private

@@ -119,7 +119,7 @@ module RuoteAMQP
     # * :reply_by_default => (bool) false by default
     # * :default_queue => (string) nil by default
     def initialize( options = {} )
-      ensure_reactor!
+      RuoteAMQP.ensure_reactor!
 
       @options = {
         :reply_by_default => false,
@@ -161,8 +161,7 @@ module RuoteAMQP
     end
 
     def stop
-      AMQP.stop { EM.stop } #if EM.reactor_running? }
-      @em_thread.join if @em_thread
+      RuoteAMQP.shutdown_reactor!
     end
 
     def cancel(fei, flavour)
@@ -180,10 +179,6 @@ module RuoteAMQP
     def encode_workitem( wi )
       wi.fields['params']['reply_queue'] = Listener.queue
       wi.to_h.to_json
-    end
-
-    def ensure_reactor!
-      @em_thread = Thread.new { EM.run } unless EM.reactor_running?
     end
   end
 end
