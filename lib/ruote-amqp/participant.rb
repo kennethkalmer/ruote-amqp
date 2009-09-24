@@ -113,7 +113,6 @@ module RuoteAMQP
   class Participant
 
     include Ruote::EngineContext
-    include Ruote::LocalParticipant
 
     # Accepts an options hash with the following keys:
     #
@@ -156,8 +155,8 @@ module RuoteAMQP
         raise "no queue in workitem params!"
       end
 
-      if @options[:reply_by_default] || workitem.fields['params']['reply-anyway'] == true
-        reply_to_engine( workitem )
+      if @options[:reply_by_default] || workitem.fields['params']['reply_anyway'] == true
+        engine.reply( workitem )
       end
     end
 
@@ -168,7 +167,7 @@ module RuoteAMQP
 
     def cancel(fei, flavour)
     end
- 
+
     private
 
     def determine_queue( workitem )

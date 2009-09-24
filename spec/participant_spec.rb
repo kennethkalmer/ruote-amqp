@@ -18,7 +18,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout(10) do
+      Timeout::timeout(60) do
         @msg = nil
         MQ.queue('test1').subscribe { |msg| @msg = msg }
 
@@ -51,7 +51,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @tracer.to_s.should == "done."
 
     begin
-      Timeout::timeout(10) do
+      Timeout::timeout(5) do
         @msg = nil
         MQ.queue('test4').subscribe { |msg| @msg = msg }
 
@@ -83,7 +83,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @tracer.to_s.should == "done."
 
     begin
-      Timeout::timeout(10) do
+      Timeout::timeout(5) do
         @msg = nil
         MQ.queue('test2').subscribe { |msg| @msg = msg }
 
@@ -116,7 +116,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout(10) do
+      Timeout::timeout(5) do
         @msg = nil
         MQ.queue('test5').subscribe { |msg| @msg = msg }
 
@@ -154,7 +154,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
 
     [ 'test6', 'test7', 'test8' ].each do |q|
       begin
-        Timeout::timeout(10) do
+        Timeout::timeout(5) do
           @msg = nil
           MQ.queue( q ).subscribe { |msg| @msg = msg }
 

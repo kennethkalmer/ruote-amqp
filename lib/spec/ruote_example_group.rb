@@ -1,5 +1,5 @@
 module Spec
-  module Ruote
+  module RuoteSpec
     module Example
       class RuoteExampleGroup < Spec::Example::ExampleGroup
       end

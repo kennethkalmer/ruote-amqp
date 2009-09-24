@@ -1,13 +1,13 @@
-begin
-  require 'spec'
-rescue LoadError
-  require 'rubygems' unless ENV['NO_RUBYGEMS']
-  gem 'rspec'
-  require 'spec'
-end
+require 'rubygems'
+gem 'rspec'
+require 'spec'
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 $:.unshift('../ruote/lib')
+
+# For the tests to work you need to use the AMQP gem built from
+# http://github.com/kennethkalmer/amqp.git
+gem 'amqp', '=0.6.4'
 
 require 'fileutils'
 require 'json'
@@ -24,6 +24,8 @@ AMQP.settings[:host]  = '172.16.133.50'
 AMQP.settings[:vhost] = '/ruote-test'
 AMQP.settings[:user]  = 'ruote'
 AMQP.settings[:pass]  = 'ruote'
+
+#AMQP.logging = true
 
 Spec::Runner.configure do |config|
 

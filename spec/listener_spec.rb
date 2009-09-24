@@ -20,9 +20,9 @@ describe RuoteAMQP::Listener do
     fei = @engine.launch pdef
 
     begin
-      Timeout::timeout(10) do
-        msg = nil
-        MQ.queue('test3').subscribe { |msg| @msg = msg }
+      Timeout::timeout(5) do
+        @msg = nil
+        MQ.queue('test3').subscribe { |msg| @msg = msg; puts @msg }
 
         loop do
           break unless @msg.nil?
@@ -33,14 +33,17 @@ describe RuoteAMQP::Listener do
       violated "Timeout waiting for message"
     end
 
-    wi = Ruote::Workitem.from_h( OpenWFE::Json.decode( @msg ) )
+    wi = Ruote::Workitem.from_h( Ruote::Json.decode( @msg ) )
     wi.attributes['foo'] = "bar"
 
-    MQ.queue( wi.attributes['reply_queue'] ).publish( OpenWFE::Json.encode( wi.to_h ) )
+    MQ.queue( wi.attributes['params']['reply_queue'] ).publish( Ruote::Json.encode( wi.to_h ) )
 
-    wait( fei )
+    @engine.context[:s_logger].wait_for([
+      [ :processes, :terminated, { :wfid => fei } ],
+      [ :errors, nil, { :wfid => fei } ]
+    ])
 
-    @engine.should_not have_errors( fei )
+    @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "foo\nbar"
