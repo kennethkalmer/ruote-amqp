@@ -21,6 +21,11 @@ http://openwfe.rubyforge.org/part.html
 
 Please review the detailed RDOC in RuoteAMQP::Participant and Ruote::AMQP::Listener
 
+== Ruote 2.0 Support
+
+Stop reading right here, checkout the +ruote2.0+ branch, and continue reading
+the documentation in there.
+
 == REQUIREMENTS:
 
 * ruote[http://openwfe.rubyforge.org] 0.9.21 or later
