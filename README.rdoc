@@ -1,7 +1,7 @@
 = ruote-amqp
 
 * http://github.com/kennethkalmer/ruote-amqp
-* http://openwfe.rubyforge.org
+* http://ruote.rubyforge.org
 
 == DESCRIPTION:
 
@@ -9,7 +9,7 @@ ruote-amqp provides an AMQP participant/listener pair that allows you to
 distribute workitems out to AMQP consumers for processing.
 
 To learn more about remote participants in ruote please see
-http://openwfe.rubyforge.org/part.html
+http://openwferu.rubyforge.org/part.html
 
 == FEATURES/PROBLEMS:
 
@@ -25,16 +25,17 @@ Please review the detailed RDOC in RuoteAMQP::Participant and Ruote::AMQP::Liste
 
 * ruote[http://ruote.rubyforge.org] 2.0.0 or later
 * amqp[http://github.com/tmm1/amqp] 0.6.1 or later
+* rabbitmq[http://www.rabbitmq.com/] 1.6.0 or later
 
 NOTE: It might be required that you build the amqp gem yourself.
 
 ruote 2.0.0 is currently only available to build on your own since John 
-Mettraux is working tirelessly to ship a stableruote 2.0. To build your own ruote 
+Mettraux is working tirelessly to ship a stable ruote 2.0. To build your own ruote 
 2.0.0 gem run these commands:
 
   $ git clone git://github.com/jmettraux/ruote.git
   $ cd ruote
-  $ git checkout ruote2.0
+  $ git checkout --track origin/ruote2.0
   $ rake gem
   $ sudo gem install pkg/ruote-2.0.0.gem
 
