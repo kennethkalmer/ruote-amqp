@@ -55,16 +55,20 @@ module RuoteAMQP
         self.class.queue = q
       end
 
-      RuoteAMQP.ensure_reactor!
+      RuoteAMQP.start!
 
       MQ.queue( self.class.queue, :durable => true ).subscribe do |message|
-        workitem = decode_workitem( message )
-        engine.reply( workitem )
+        if AMQP.closing?
+          # Do nothing, we're going down
+        else
+          workitem = decode_workitem( message )
+          engine.reply( workitem )
+        end
       end
     end
 
     def stop
-      RuoteAMQP.shutdown_reactor!
+      RuoteAMQP.stop!
     end
 
     private

@@ -119,7 +119,7 @@ module RuoteAMQP
     # * :reply_by_default => (bool) false by default
     # * :default_queue => (string) nil by default
     def initialize( options = {} )
-      RuoteAMQP.ensure_reactor!
+      RuoteAMQP.start!
 
       @options = {
         :reply_by_default => false,

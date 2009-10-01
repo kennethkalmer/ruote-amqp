@@ -47,7 +47,6 @@ Spec::Runner.configure do |config|
 
   config.after(:each) do
     @engine.stop
-    RuoteAMQP.shutdown_reactor!
   end
 
   config.after(:all) do
