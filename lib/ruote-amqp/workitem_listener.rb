@@ -12,10 +12,10 @@ module RuoteAMQP
   #
   # AMQP configuration is handled by directly manipulating the values of
   # the +AMQP.settings+ hash, as provided by the AMQP gem. No
-  # defaults are set by the participant. The only +option+ parsed by
+  # defaults are set by the listener. The only +option+ parsed by
   # the initializer of the workitem listener is the +queue+ key (Hash
   # expected). If no +queue+ key is set, the listener will subscribe
-  # to the +ruote+ direct exchange for workitems, otherwise it will
+  # to the +ruote_workitems+ direct exchange for workitems, otherwise it will
   # subscribe to the direct exchange provided.
   #
   # The participant requires version 0.6.1 or later of the amqp gem.
