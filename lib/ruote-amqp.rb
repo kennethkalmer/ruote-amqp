@@ -17,8 +17,8 @@ module RuoteAMQP
 
   VERSION = '2.0.0'
 
-  autoload 'Participant', 'ruote-amqp/participant'
-  autoload 'Listener',    'ruote-amqp/listener'
+  autoload 'Participant',      'ruote-amqp/participant'
+  autoload 'WorkitemListener', 'ruote-amqp/workitem_listener'
 
   class << self
 

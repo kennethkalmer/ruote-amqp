@@ -177,7 +177,7 @@ module RuoteAMQP
 
     # Encode (and extend) the workitem as JSON
     def encode_workitem( wi )
-      wi.fields['params']['reply_queue'] = Listener.queue
+      wi.fields['params']['reply_queue'] = WorkitemListener.queue
       wi.to_h.to_json
     end
   end

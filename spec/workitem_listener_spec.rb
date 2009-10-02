@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
-describe RuoteAMQP::Listener do
+describe RuoteAMQP::WorkitemListener do
 
   it "should handle replies" do
 
@@ -15,7 +15,7 @@ describe RuoteAMQP::Listener do
 
     @engine.register_participant( :amqp, RuoteAMQP::Participant )
 
-    @engine.register_listener( RuoteAMQP::Listener )
+    @engine.register_listener( RuoteAMQP::WorkitemListener )
 
     fei = @engine.launch pdef
 
