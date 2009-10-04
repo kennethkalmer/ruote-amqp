@@ -49,6 +49,8 @@ module RuoteAMQP
       mutex.synchronize { cv.wait(mutex) }
 
       MQ.prefetch(1)
+
+      yield if block_given?
     end
 
     # Check whether the AMQP connection is started
