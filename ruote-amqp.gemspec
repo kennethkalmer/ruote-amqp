@@ -7,14 +7,13 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kenneth Kalmer"]
   s.date = %q{2009-08-03}
-  s.description = %q{ruote-amqp provides an AMQP participant/listener pair that allows you to 
-distribute workitems out to AMQP consumers for processing.
+  s.description = %q{ruote-amqp provides an AMQP participant/listener pair that allows you to distribute workitems out to AMQP consumers for processing.
 
 To learn more about remote participants in ruote please see
 http://openwfe.rubyforge.org/part.html}
   s.email = ["kenneth.kalmer@gmail.com"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "PostInstall.txt", "TODO.txt"]
-  s.files = ["History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc", "Rakefile", "TODO.txt", "lib/ruote-amqp.rb", "lib/ruote-amqp/listener.rb", "lib/ruote-amqp/participant.rb", "lib/spec/ruote.rb", "lib/spec/ruote_example_group.rb", "lib/spec/ruote_helpers.rb", "lib/spec/ruote_matchers.rb", "script/console", "script/destroy", "script/generate", "spec/listener_spec.rb", "spec/participant_spec.rb", "spec/ruote_amqp_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "tasks/rspec.rake"]
+  s.files = ["History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc", "Rakefile", "TODO.txt", "lib/ruote-amqp.rb", "lib/ruote-amqp/launchitem_listener.rb", "lib/ruote-amqp/workitem_listener.rb", "lib/ruote-amqp/participant.rb", "lib/spec/ruote.rb", "lib/spec/ruote_example_group.rb", "lib/spec/ruote_helpers.rb", "lib/spec/ruote_matchers.rb", "script/console", "script/destroy", "script/generate","spec/launchitem_listener.rb", "spec/workitem_listener.rb", "spec/participant_spec.rb", "spec/ruote_amqp_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "tasks/rspec.rake"]
   s.homepage = %q{http://github.com/kennethkalmer/ruote-amqp}
   s.post_install_message = %q{PostInstall.txt}
   s.rdoc_options = ["--main", "README.rdoc"]

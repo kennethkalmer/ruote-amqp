@@ -5,7 +5,8 @@ README.rdoc
 Rakefile
 TODO.txt
 lib/ruote-amqp.rb
-lib/ruote-amqp/listener.rb
+lib/ruote-amqp/launchitem_listener.rb
+lib/ruote-amqp/workitem_listener.rb
 lib/ruote-amqp/participant.rb
 lib/spec/ruote.rb
 lib/spec/ruote_example_group.rb
@@ -14,7 +15,8 @@ lib/spec/ruote_matchers.rb
 script/console
 script/destroy
 script/generate
-spec/listener_spec.rb
+spec/launchitem_listener_spec.rb
+spec/workitem_listener_spec.rb
 spec/participant_spec.rb
 spec/ruote_amqp_spec.rb
 spec/spec.opts
