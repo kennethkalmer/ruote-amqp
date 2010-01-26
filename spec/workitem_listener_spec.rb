@@ -15,7 +15,7 @@ describe RuoteAMQP::WorkitemListener do
 
     @engine.register_participant( :amqp, RuoteAMQP::Participant )
 
-    RuoteAMQP::WorkitemListener.new( @engine.storage )
+    RuoteAMQP::WorkitemListener.new( @engine )
 
     fei = @engine.launch pdef
 

@@ -163,7 +163,7 @@ module RuoteAMQP
     end
 
     def stop
-      RuoteAMQP.shutdown_reactor!
+      RuoteAMQP.stop!
     end
 
     def cancel(fei, flavour)

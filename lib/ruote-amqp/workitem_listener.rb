@@ -18,13 +18,13 @@ module RuoteAMQP
   # to the +ruote_workitems+ direct exchange for workitems, otherwise it will
   # subscribe to the direct exchange provided.
   #
-  # The participant requires version 0.6.1 or later of the amqp gem.
+  # The participant requires version 0.6.6 or later of the amqp gem.
   #
   # == Usage
   #
-  # Register the listener with the engine:
+  # Register the engine or storage with the listener:
   #
-  #   engine.register_listener( RuoteAMQP::WorkitemListener )
+  #   RuoteAMQP::WorkitemListener.new( engine_or_storage )
   #
   # The workitem listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
@@ -47,9 +47,13 @@ module RuoteAMQP
 
     end
 
-    def initialize( storage, queue = nil )
+    # Starts a new WorkitemListener
+    #
+    # @param [ Ruote::Engine, Ruote::Storage ] A configured ruote engine or storage instance
+    # @param [ String ] An optional queue name
+    def initialize( engine_or_storage, queue = nil )
 
-      @storage = storage
+      @storage = engine_or_storage.respond_to?( :storage ) ? engine_or_storage.storage : engine_or_storage
 
       self.class.queue = queue if queue
 

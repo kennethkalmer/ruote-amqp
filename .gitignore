@@ -2,3 +2,5 @@
 work/
 logs/
 pkg/
+.yardoc
+doc/

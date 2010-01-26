@@ -14,7 +14,7 @@ begin
     gemspec.authors = ['kenneth.kalmer@gmail.com']
     gemspec.extra_rdoc_files.include '*.txt'
 
-    gemspec.add_dependency 'json'
+    gemspec.add_dependency 'rufus-json', '>= 0.1.0'
     gemspec.add_dependency 'amqp', '>= 0.6.6'
     gemspec.add_dependency 'ruote', '= 2.1.4'
     gemspec.add_development_dependency 'rspec'

@@ -10,13 +10,12 @@ module RuoteAMQP
   # The LaunchitemListener expects JSON formatted messages that look like this:
   #
   #   {
-  #     "definition" : "URL or process definition",
-  #     "fields" : { "key" : "value" }
+  #     "definition" : "process definition",
+  #     "fields" : { "key" : "value" },
+  #     "variables" : { "key" : "value" }
   #  }
   #
-  # The definition key can be a complete string representation of a business
-  # process, or a URL pointing to the process definition. Note that the
-  # engine needs to be configured to load process definitions from URL's
+  # The definition key is a complete string representation of a business process.
   #
   # == Configuration
   #
@@ -26,13 +25,13 @@ module RuoteAMQP
   # key (in the optional hash). If no +queue+ key is provided, the listener
   # will subscribe to the +ruote_launchitems+ direct exchange for launchitems.
   #
-  # The listener requires version 0.6.1 or later of the amqp gem.
+  # The listener requires version 0.6.6 or later of the amqp gem.
   #
   # == Usage
   #
-  # Register the listener with the engine:
+  # Register the engine with the listener:
   #
-  #   engine.register_listener( RuoteAMQP::LaunchitemListener )
+  #   RuoteAMQP::LaunchitemListener.new( engine_instance )
   #
   # The workitem listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
@@ -49,9 +48,11 @@ module RuoteAMQP
 
     end
 
-    def initialize( storage, queue = nil )
-
-      @storage = storage
+    # Start a new LaunchItem listener
+    #
+    # @param [ Ruote::Engine ] An instance of a ruote engine
+    # @param [ String ] Optional queue name
+    def initialize( engine, queue = nil )
 
       self.class.queue = queue if queue
 
@@ -62,7 +63,7 @@ module RuoteAMQP
           # Do nothing, we're going down
         else
           launchitem = decode_launchitem( message )
-          @storage.launch( *launchitem )
+          engine.launch( *launchitem )
         end
       end
     end
