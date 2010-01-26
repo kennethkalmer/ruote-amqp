@@ -18,7 +18,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout(60) do
+      Timeout::timeout(10) do
         @msg = nil
         MQ.queue('test1').subscribe { |msg| @msg = msg }
 

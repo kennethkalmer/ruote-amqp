@@ -7,12 +7,14 @@ $:.unshift('../ruote/lib')
 
 # For the tests to work you need to use the AMQP gem built from
 # http://github.com/kennethkalmer/amqp.git
-gem 'amqp', '=0.6.4'
+gem 'amqp', '=0.6.6'
 
 require 'fileutils'
 require 'json'
 
 require 'ruote/engine'
+require 'ruote/worker'
+require 'ruote/storage/hash_storage'
 require 'ruote/log/test_logger'
 
 require 'ruote-amqp'
@@ -20,8 +22,8 @@ require 'spec/ruote'
 
 
 # AMQP magic worked here
-AMQP.settings[:host]  = '172.16.133.50'
-AMQP.settings[:vhost] = '/ruote-test'
+AMQP.settings[:host]  = 'localhost'
+AMQP.settings[:vhost] = 'ruote-test'
 AMQP.settings[:user]  = 'ruote'
 AMQP.settings[:pass]  = 'ruote'
 
@@ -34,19 +36,20 @@ Spec::Runner.configure do |config|
   config.before(:each) do
     @tracer = Tracer.new
 
-    ac = {}
+    @engine = Ruote::Engine.new(
+      Ruote::Worker.new(
+        Ruote::HashStorage.new(
+          's_logger' => [ 'ruote/log/test_logger', 'Ruote::TestLogger' ]
+        )
+      )
+    )
 
-    ac[:s_tracer] = @tracer
-    ac[:ruby_eval_allowed] = true
-    ac[:definition_in_launchitem_allowed] = true
-
-    @engine = ::Ruote::Engine.new( ac )
-
-    @engine.add_service( :s_logger, ::Ruote::TestLogger )
+    @engine.add_service( 'tracer', @tracer )
   end
 
   config.after(:each) do
-    @engine.stop
+    @engine.shutdown
+    @engine.context.storage.purge!
   end
 
   config.after(:all) do
