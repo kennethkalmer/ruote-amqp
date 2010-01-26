@@ -1,25 +1,50 @@
 require 'rubygems'
-gem 'hoe', '>= 2.1.0'
-require 'hoe'
-require 'fileutils'
+require 'rake'
 
-Hoe.plugin :newgem
-# Hoe.plugin :website
-# Hoe.plugin :cucumberfeatures
+require 'lib/ruote-amqp'
 
-# Generate all the Rake tasks
-# Run 'rake -T' to see list of generated tasks (from gem root directory)
-$hoe = Hoe.spec 'ruote-amqp' do
-  self.developer 'Kenneth Kalmer', 'kenneth.kalmer@gmail.com'
-  self.post_install_message = 'PostInstall.txt' # TODO remove if post-install message not required
-  self.rubyforge_name       = self.name # TODO this is default value
-  self.extra_deps         = [['ruote','= 2.0.0'], ['amqp', '= 0.6.0']]
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = 'ruote-amqp'
+    gemspec.version = RuoteAMQP::VERSION
+    gemspec.summary = 'AMQP participant/listener pair for ruote 2.1'
+    gemspec.email = 'kenneth.kalmer@gmail.com'
+    gemspec.homepage = 'http://github.com/kennethkalmer/ruote-amqp'
+    gemspec.authors = ['kenneth.kalmer@gmail.com']
+    gemspec.extra_rdoc_files.include '*.txt'
 
+    gemspec.add_dependency 'json'
+    gemspec.add_dependency 'amqp', '>= 0.6.6'
+    gemspec.add_dependency 'ruote', '= 2.1.4'
+    gemspec.add_development_dependency 'rspec'
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler not available. Install it with 'gem install jeweler'"
 end
 
-require 'newgem/tasks'
-Dir['tasks/**/*.rake'].each { |t| load t }
+require 'spec/rake/spectask'
+Spec::Rake::SpecTask.new(:spec) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.spec_files = FileList['spec/**/*_spec.rb']
+end
 
-# TODO - want other tests/tasks run by default? Add them to the list
-# remove_task :default
-# task :default => [:spec, :features]
+Spec::Rake::SpecTask.new(:rcov) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rcov = true
+end
+
+task :spec #=> :check_dependencies
+
+task :default => :spec
+
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new
+rescue LoadError
+  task :yardoc do
+    abort "YARD is not available. In order to run yardoc, you must: sudo gem install yard"
+  end
+end
