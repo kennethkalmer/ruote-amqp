@@ -36,9 +36,7 @@ module RuoteAMQP
   #
   # The workitem listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
-  class LaunchitemListener
-
-    include Ruote::EngineContext
+  class LaunchitemListener < Ruote::Receiver
 
     class << self
 
@@ -51,11 +49,11 @@ module RuoteAMQP
 
     end
 
-    def initialize( options = {} )
+    def initialize( storage, queue = nil )
 
-      if q = options.delete(:queue)
-        self.class.queue = q
-      end
+      @storage = storage
+
+      self.class.queue = queue if queue
 
       RuoteAMQP.start!
 
@@ -64,7 +62,7 @@ module RuoteAMQP
           # Do nothing, we're going down
         else
           launchitem = decode_launchitem( message )
-          engine.launch( launchitem )
+          @storage.launch( *launchitem )
         end
       end
     end
@@ -77,12 +75,13 @@ module RuoteAMQP
 
     # Complicated guesswork that needs to happen here to detect the format
     def decode_launchitem( msg )
-      hash = Ruote::Json.decode( msg )
+      hash = Rufus::Json.decode( msg )
       opts = {}
       definition = hash.delete('definition')
       fields = hash.delete('fields') || {}
+      variables = hash.delete('variables') || {}
 
-      ::Ruote::Launchitem.new( definition, fields )
+      [ definition, fields, variables ]
     end
   end
 end

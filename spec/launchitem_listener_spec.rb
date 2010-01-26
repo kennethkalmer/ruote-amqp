@@ -16,14 +16,11 @@ describe RuoteAMQP::LaunchitemListener do
       }
     }.to_json
 
-    @engine.register_listener( RuoteAMQP::LaunchitemListener )
+    RuoteAMQP::LaunchitemListener.new( @engine )
 
     MQ.queue( RuoteAMQP::LaunchitemListener.queue ).publish( json )
 
-    @engine.context[:s_logger].wait_for([
-      [ :processes, :terminated, {} ],
-      [ :errors, nil, nil ]
-    ])
+    sleep 0.5
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions

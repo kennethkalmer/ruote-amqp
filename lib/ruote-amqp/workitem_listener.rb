@@ -34,9 +34,7 @@ module RuoteAMQP
   # to the correct direct exchange specified in the workitem
   # attributes.
   #
-  class WorkitemListener
-
-    include Ruote::EngineContext
+  class WorkitemListener < Ruote::Receiver
 
     class << self
 
@@ -49,11 +47,11 @@ module RuoteAMQP
 
     end
 
-    def initialize( options = {} )
+    def initialize( storage, queue = nil )
 
-      if q = options.delete(:queue)
-        self.class.queue = q
-      end
+      @storage = storage
+
+      self.class.queue = queue if queue
 
       RuoteAMQP.start!
 
@@ -62,7 +60,7 @@ module RuoteAMQP
           # Do nothing, we're going down
         else
           workitem = decode_workitem( message )
-          engine.reply( workitem )
+          reply( workitem )
         end
       end
     end
@@ -75,8 +73,8 @@ module RuoteAMQP
 
     # Complicated guesswork that needs to happen here to detect the format
     def decode_workitem( msg )
-      hash = Ruote::Json.decode( msg )
-      Ruote::Workitem.from_h( hash )
+      hash = Rufus::Json.decode( msg )
+      Ruote::Workitem.new( hash )
     end
   end
 end

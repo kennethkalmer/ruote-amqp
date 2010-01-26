@@ -1,3 +1,5 @@
+require 'ruote/part/local_participant'
+
 module RuoteAMQP
 
   # = AMQP Participants
@@ -112,7 +114,7 @@ module RuoteAMQP
   #
   class Participant
 
-    include Ruote::EngineContext
+    include Ruote::LocalParticipant
 
     # Accepts an options hash with the following keys:
     #
@@ -146,7 +148,7 @@ module RuoteAMQP
         q = MQ.queue( target_queue, :durable => true )
 
         # Message or workitem?
-        if message = ( workitem.attributes['message'] || workitem.fields['params']['message'] )
+        if message = ( workitem.fields['message'] || workitem.fields['params']['message'] )
           q.publish( message, :persistent => RuoteAMQP.use_persistent_messages? )
         else
           q.publish( encode_workitem( workitem ), :persistent => RuoteAMQP.use_persistent_messages? )
@@ -156,7 +158,7 @@ module RuoteAMQP
       end
 
       if @options[:reply_by_default] || workitem.fields['params']['reply_anyway'] == true
-        engine.reply( workitem )
+        reply_to_engine( workitem )
       end
     end
 
