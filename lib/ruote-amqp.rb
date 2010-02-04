@@ -15,7 +15,7 @@ require 'mq'
 #
 module RuoteAMQP
 
-  VERSION = '2.1.4pre'
+  VERSION = '2.1.5'
 
   autoload 'Participant',        'ruote-amqp/participant'
   autoload 'WorkitemListener',   'ruote-amqp/workitem_listener'

@@ -16,7 +16,7 @@ begin
 
     gemspec.add_dependency 'rufus-json', '>= 0.1.0'
     gemspec.add_dependency 'amqp', '>= 0.6.6'
-    gemspec.add_dependency 'ruote', '= 2.1.4'
+    gemspec.add_dependency 'ruote', '>= 2.1.5'
     gemspec.add_development_dependency 'rspec'
   end
   Jeweler::GemcutterTasks.new
