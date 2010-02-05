@@ -147,11 +147,15 @@ module RuoteAMQP
 
         q = MQ.queue( target_queue, :durable => true )
 
+        opts = {
+          :persistent => RuoteAMQP.use_persistent_messages?,
+          :content_type => 'application/json' }
+
         # Message or workitem?
         if message = ( workitem.fields['message'] || workitem.fields['params']['message'] )
-          q.publish( message, :persistent => RuoteAMQP.use_persistent_messages? )
+          q.publish( message, opts )
         else
-          q.publish( encode_workitem( workitem ), :persistent => RuoteAMQP.use_persistent_messages? )
+          q.publish( encode_workitem( workitem ), opts )
         end
       else
         raise "no queue in workitem params!"
