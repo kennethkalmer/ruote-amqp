@@ -64,7 +64,7 @@ module RuoteAMQP
           # Do nothing, we're going down
         else
           workitem = decode_workitem( message )
-          reply( workitem )
+          receive( workitem )
         end
       end
     end
