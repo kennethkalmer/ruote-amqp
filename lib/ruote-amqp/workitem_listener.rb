@@ -53,7 +53,7 @@ module RuoteAMQP
     # @param [ String ] An optional queue name
     def initialize( engine_or_storage, queue = nil )
 
-      @storage = engine_or_storage.respond_to?( :storage ) ? engine_or_storage.storage : engine_or_storage
+      super( engine_or_storage )
 
       self.class.queue = queue if queue
 

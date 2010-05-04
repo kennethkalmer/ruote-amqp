@@ -5,9 +5,7 @@ require 'spec'
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 $:.unshift('../ruote/lib')
 
-# For the tests to work you need to use the AMQP gem built from
-# http://github.com/kennethkalmer/amqp.git
-gem 'amqp', '=0.6.6'
+gem 'amqp', '=0.6.7'
 
 require 'fileutils'
 require 'json'

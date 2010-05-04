@@ -1,5 +1,8 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
+# rspec clobbering global space... :(
+undef :context if defined?(:context)
+
 describe RuoteAMQP::WorkitemListener do
 
   it "should handle replies" do
