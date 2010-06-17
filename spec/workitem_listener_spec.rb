@@ -20,7 +20,7 @@ describe RuoteAMQP::WorkitemListener do
 
     RuoteAMQP::WorkitemListener.new( @engine )
 
-    fei = @engine.launch pdef
+    wfid = @engine.launch pdef
 
     begin
       Timeout::timeout(5) do
@@ -41,7 +41,7 @@ describe RuoteAMQP::WorkitemListener do
 
     MQ.queue( wi.fields['params']['reply_queue'] ).publish( Rufus::Json.encode( wi.to_h ) )
 
-    @engine.context.logger.wait_for( fei )
+    @engine.wait_for( wfid )
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions

@@ -12,7 +12,7 @@ module RuoteSpecHelpers
 
     wfid = @engine.launch( pdef )
 
-    @engine.context.logger.wait_for( wfid )
+    @engine.wait_for( wfid )
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
