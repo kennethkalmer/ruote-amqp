@@ -43,8 +43,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    p = RuoteAMQP::Participant.new( :reply_by_default => true )
-    @engine.register_participant( :amqp, p )
+    @engine.register_participant(
+      :amqp, RuoteAMQP::Participant, :reply_by_default => true )
 
     run_definition( pdef )
 
@@ -108,8 +108,8 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    amqp = RuoteAMQP::Participant.new( :default_queue => 'test5' )
-    @engine.register_participant( :amqp, amqp )
+    @engine.register_participant(
+      :amqp, RuoteAMQP::Participant, :default_queue => 'test5' )
 
     run_definition( pdef )
 

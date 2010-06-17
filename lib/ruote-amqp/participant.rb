@@ -92,13 +92,14 @@ module RuoteAMQP
     #
     # * :reply_by_default => (bool) false by default
     # * :default_queue => (string) nil by default
-    def initialize( options = {} )
+    def initialize( options )
+
       RuoteAMQP.start!
 
       @options = {
-        :reply_by_default => false,
-        :default_queue => nil
-      }.merge( options )
+        'reply_by_default' => false,
+        'default_queue' => nil
+      }.merge( options ).inject({}) { |h, (k, v)| h[k.to_s] = v; h }
     end
 
     # Process the workitem at hand. By default the workitem will be
@@ -127,7 +128,7 @@ module RuoteAMQP
         raise "no queue in workitem params!"
       end
 
-      if @options[:reply_by_default] || workitem.fields['params']['reply_anyway'] == true
+      if @options['reply_by_default'] || workitem.fields['params']['reply_anyway'] == true
         reply_to_engine( workitem )
       end
     end
@@ -137,12 +138,16 @@ module RuoteAMQP
     end
 
     def cancel(fei, flavour)
+      #
+      # TODO : sending a cancel item is not a bad idea, especially if the
+      #        job done over the amqp fence lasts...
+      #
     end
 
     private
 
     def determine_queue( workitem )
-      workitem.fields['params']['queue'] || @options[:default_queue]
+      workitem.fields['params']['queue'] || @options['default_queue']
     end
 
     # Encode (and extend) the workitem as JSON
