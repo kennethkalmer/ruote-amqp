@@ -65,34 +65,6 @@ module RuoteAMQP
   #
   # When waiting for a reply it only makes sense to send a workitem.
   #
-  # Keeping things DRY with participant name to queue maps:
-  #
-  #   amqp = RuoteAMQP::Participant.new( :default_queue => 'test' )
-  #   amqp.map_participant 'george', 'whitehouse'
-  #   amqp.map_participant 'barak', 'whitehouse'
-  #   amqp.map_participant 'greenspan', 'treasury'
-  #
-  #   engine.register_participant( :george, amqp )
-  #   engine.register_participant( :barak, amqp )
-  #   engine.register_participant( :greespan, amqp )
-  #   engine.register_participant( :amqp, amqp )
-  #
-  #   class DryAmqProcess0 < OpenWFE::ProcessDefinition
-  #     cursor :break_if => "${f:economy_recovered}" do
-  #       # Workitem sent to 'whitehouse' queue
-  #       george :activity => 'Tank economy'
-  #
-  #       # Workitem sent to 'treasury' queue
-  #       greenspan :activity => 'Resign'
-  #
-  #       # Workitem sent to 'whitehouse' queue
-  #       barak :activity => 'Cleanup mess'
-  #
-  #       # Workitem sent to default 'test' queue
-  #       amqp :activity => 'Notify CNN'
-  #     end
-  #   end
-  #
   # == Workitem modifications
   #
   # To ease replies, and additional workitem attribute is set:
@@ -127,12 +99,6 @@ module RuoteAMQP
         :reply_by_default => false,
         :default_queue => nil
       }.merge( options )
-
-      @participant_maps = {}
-    end
-
-    def map_participant( name, queue )
-      @participant_maps[ name ] = queue
     end
 
     # Process the workitem at hand. By default the workitem will be
@@ -176,9 +142,7 @@ module RuoteAMQP
     private
 
     def determine_queue( workitem )
-      workitem.fields['params']['queue'] ||
-      @participant_maps[ workitem.participant_name ] ||
-      @options[:default_queue]
+      workitem.fields['params']['queue'] || @options[:default_queue]
     end
 
     # Encode (and extend) the workitem as JSON
