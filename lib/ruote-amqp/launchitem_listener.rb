@@ -10,7 +10,7 @@ module RuoteAMQP
   # The LaunchitemListener expects JSON formatted messages that look like this:
   #
   #   {
-  #     "definition" : "process definition",
+  #     "definition" : [ 'process_definition', {}, [] ],
   #     "fields" : { "key" : "value" },
   #     "variables" : { "key" : "value" }
   #  }

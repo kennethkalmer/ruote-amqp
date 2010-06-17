@@ -37,11 +37,11 @@ module RuoteAMQP
   # Setup a participant that always replies to the engine
   #
   #   engine.register_participant(
-  #     :amqp, RuoteAMQP::Participant.new(:reply_by_default => true ) )
+  #     :amqp, RuoteAMQP::Participant, :reply_by_default => true )
   #
   # Sending a message example
   #
-  #   class AmqpMessageExample0 < OpenWFE::ProcessDefinition
+  #   Ruote.process_definition do
   #     sequence do
   #       amqp :queue => 'test', :message => 'foo'
   #     end
@@ -49,7 +49,7 @@ module RuoteAMQP
   #
   # Sending a workitem
   #
-  #   class AmqpWorkitemExample0 < OpenWFE::ProcessDefinition
+  #   Ruote.process_definition do
   #     sequence do
   #       amqp :queue => 'test'
   #     end
@@ -57,7 +57,7 @@ module RuoteAMQP
   #
   # Let the participant reply to the engine without involving the listener
   #
-  #   class AmqpWaitExample < OpenWFE::ProcessDefinition
+  #   Ruote.process_definition do
   #     sequence do
   #       amqp :queue => 'test', :reply_anyway => true
   #     end
@@ -67,7 +67,7 @@ module RuoteAMQP
   #
   # == Workitem modifications
   #
-  # To ease replies, and additional workitem attribute is set:
+  # To ease replies, an additional workitem attribute is set:
   #
   #   'reply_queue'
   #
