@@ -1,15 +1,11 @@
 
 require File.dirname(__FILE__) + '/spec_helper'
 
-#
-# NOTE : RuoteAMQP::WorkitemListener has been depreacted in favour of
-#        RuoteAMQP::Receiver
-#
-
 # rspec clobbering global space... :(
-#undef :context if defined?(:context)
+undef :context if defined?(:context)
 
-describe RuoteAMQP::WorkitemListener do
+
+describe RuoteAMQP::Receiver do
 
   it "should handle replies" do
 
@@ -24,18 +20,13 @@ describe RuoteAMQP::WorkitemListener do
 
     @engine.register_participant( :amqp, RuoteAMQP::Participant )
 
-    RuoteAMQP::WorkitemListener.new( @engine )
+    RuoteAMQP::Receiver.new( @engine )
 
     wfid = @engine.launch pdef
 
     begin
       Timeout::timeout(5) do
-
         @msg = nil
-
-        MQ.queue('test3').unsubscribe
-        sleep 0.3
-
         MQ.queue('test3').subscribe { |msg| @msg = msg }
 
         loop do
@@ -58,6 +49,34 @@ describe RuoteAMQP::WorkitemListener do
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "foo\nbar"
+
+    purge_engine
+  end
+
+  it "should launch processes" do
+    json = {
+      "definition" => "
+        Ruote.process_definition :name => 'test' do
+          sequence do
+            echo '${f:foo}'
+          end
+        end
+      ",
+      "fields" => {
+        "foo" => "bar"
+      }
+    }.to_json
+
+    RuoteAMQP::Receiver.new( @engine, :launchitems => true )
+
+    MQ.queue( 'ruote_workitems' ).publish( json )
+
+    sleep 0.5
+
+    @engine.should_not have_errors
+    @engine.should_not have_remaining_expressions
+
+    @tracer.to_s.should == "bar"
 
     purge_engine
   end

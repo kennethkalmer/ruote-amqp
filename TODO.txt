@@ -1,4 +1,6 @@
 ruote-amqp TODO
 ===============
 
-[ ] Launch processes over AMQP
+[o] Launch processes over AMQP (LaunchitemListener)
+[o] Receiver
+

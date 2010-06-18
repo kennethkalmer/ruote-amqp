@@ -1,5 +1,7 @@
 
 require 'ruote/part/local_participant'
+require 'ruote-amqp'
+
 
 module RuoteAMQP
 
@@ -21,8 +23,6 @@ module RuoteAMQP
   # AMQP configuration is handled by directly manipulating the
   # values of the +AMQP.settings+ hash, as provided by the AMQP
   # gem. No AMQP defaults are set by the participant.
-  #
-  # The participant requires version 0.6.1 or later of the amqp gem.
   #
   # == Usage
   #
@@ -148,12 +148,14 @@ module RuoteAMQP
     private
 
     def determine_queue( workitem )
+
       workitem.fields['params']['queue'] || @options['default_queue']
     end
 
-    # Encode (and extend) the workitem as JSON
+    # Encode the workitem as JSON
+    #
     def encode_workitem( wi )
-      wi.fields['params']['reply_queue'] = WorkitemListener.queue
+
       Rufus::Json.encode( wi.to_h )
     end
   end

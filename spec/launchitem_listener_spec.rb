@@ -1,4 +1,10 @@
+
 require File.dirname(__FILE__) + '/spec_helper'
+
+#
+# NOTE : RuoteAMQP::LaunchitemListener has been depreacted in favour of
+#        RuoteAMQP::Receiver
+#
 
 describe RuoteAMQP::LaunchitemListener do
 
@@ -18,7 +24,7 @@ describe RuoteAMQP::LaunchitemListener do
 
     RuoteAMQP::LaunchitemListener.new( @engine )
 
-    MQ.queue( RuoteAMQP::LaunchitemListener.queue ).publish( json )
+    MQ.queue( 'ruote_launchitems' ).publish( json )
 
     sleep 0.5
 
@@ -30,3 +36,4 @@ describe RuoteAMQP::LaunchitemListener do
     purge_engine
   end
 end
+

@@ -16,7 +16,7 @@ http://ruote.rubyforge.org/part_implementations.html
 == FEATURES/PROBLEMS:
 
 * Flexible participant for sending workitems
-* Flexible listener for receiving replies
+* Flexible receiver for receiving replies
 * Flexible launch item listener for launching processes over AMQP
 * Fully evented (thanks to the amqp gem)
 
@@ -40,7 +40,7 @@ Please be sure to have read the requirements section above
 == TESTS:
 
 To run the tests you need the following requirements met, or the testing environment
-will fail horribly.
+will fail horribly (or simply get stuck without output).
 
 === RabbitMQ vhost
 

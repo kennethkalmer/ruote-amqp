@@ -1,3 +1,4 @@
+
 require 'mq'
 
 # AMQP participant and listener pair for ruote.
@@ -18,6 +19,8 @@ module RuoteAMQP
   VERSION = '2.1.10'
 
   autoload 'Participant',        'ruote-amqp/participant'
+
+  autoload 'Receiver',           'ruote-amqp/receiver'
   autoload 'WorkitemListener',   'ruote-amqp/workitem_listener'
   autoload 'LaunchitemListener', 'ruote-amqp/launchitem_listener'
 
@@ -70,6 +73,6 @@ module RuoteAMQP
       Thread.main[:ruote_amqp_connection].join
       Thread.main[:ruote_amqp_started] = false
     end
-
   end
 end
+

@@ -17,10 +17,7 @@ Spec::Matchers.define :have_errors do |*args|
   end
   failure_message_for_should_not do |engine|
     "Expected the engine to not have errors, but it did.\n" +
-    @ps.errors.map { |e|
-      "  * error: #{e.error_class} #{e.error_message} " +
-      "\n\"#{e.error_backtrace.join("\n")}\""
-    }.join("\n")
+    @ps.errors.map { |e| "  * error: #{e.message}\n\"#{e.trace}\"" }.join("\n")
   end
   description do
     #
