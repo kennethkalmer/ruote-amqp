@@ -1,3 +1,4 @@
+
 require 'ruote/part/local_participant'
 
 module RuoteAMQP
@@ -137,7 +138,7 @@ module RuoteAMQP
       RuoteAMQP.stop!
     end
 
-    def cancel(fei, flavour)
+    def cancel( fei, flavour )
       #
       # TODO : sending a cancel item is not a bad idea, especially if the
       #        job done over the amqp fence lasts...
