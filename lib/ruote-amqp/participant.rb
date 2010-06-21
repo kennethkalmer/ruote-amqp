@@ -5,6 +5,7 @@ require 'ruote-amqp'
 
 module RuoteAMQP
 
+  #
   # = AMQP Participants
   #
   # The RuoteAMQP::Participant allows you to send workitems (serialized as
@@ -93,6 +94,7 @@ module RuoteAMQP
     #
     # * :reply_by_default => (bool) false by default
     # * :default_queue => (string) nil by default
+    #
     def initialize( options )
 
       RuoteAMQP.start!
@@ -100,7 +102,9 @@ module RuoteAMQP
       @options = {
         'reply_by_default' => false,
         'default_queue' => nil
-      }.merge( options ).inject({}) { |h, (k, v)| h[k.to_s] = v; h }
+      }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
+        #
+        # the inject is here to make sure that all options have String keys
     end
 
     # Process the workitem at hand. By default the workitem will be
@@ -110,6 +114,7 @@ module RuoteAMQP
     #
     # To force the participant to reply to the engine, set the
     # +reply_anyway+ workitem parameter.
+    #
     def consume( workitem )
       if target_queue = determine_queue( workitem )
 
