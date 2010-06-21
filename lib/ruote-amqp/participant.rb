@@ -9,14 +9,18 @@ module RuoteAMQP
   #
   # The RuoteAMQP::Participant allows you to send workitems (serialized as
   # JSON) or messages to any AMQP queues right from the process
-  # definition. When combined with the RuoteAMQP::Listener you can easily
+  # definition. When combined with the RuoteAMQP::Receiver you can easily
   # leverage an extremely powerful local/remote participant
   # combinations.
   #
-  # By default the participant relies on the presence of an AMQP
-  # listener. Workitems are sent and no replies are given to the
-  # engine. The participant can be configured to reply to the engine
-  # immediately after queueing a message, see the usage section below.
+  # The local part of the RuoteAMQP::Participant relies on the
+  # presence of an RuoteAMQP::Receiver. Workitems are sent to the
+  # remote participant and the local part does not normally reply to
+  # the engine.
+  #
+  # For 'fire and forget' usage the local participant can be
+  # configured to reply to the engine immediately after queueing a
+  # message.
   #
   # == Configuration
   #
@@ -28,19 +32,28 @@ module RuoteAMQP
   #
   # Currently it's possible to send either workitems or messages
   # directly to a specific queue, and have the engine wait for
-  # replies on another queue (see AMQPListener).
+  # replies on the 'ruote_workitems' queue (see RuoteAMQP::Receiver).
   #
   # Setting up the participant
   #
   #   engine.register_participant(
   #     :amqp, RuoteAMQP::Participant )
   #
-  # Setup a participant that always replies to the engine
+  # Define the command and queue used by a process step
+  #
+  #   engine.register_participant(
+  #     :delete_user, RuoteAMQP::Participant,
+  #     :queue => 'user_manager',
+  #     :command => '/user/delete'
+  #     )
+  #
+  # Setup a 'fire and forget' participant that always replies to the
+  # engine:
   #
   #   engine.register_participant(
   #     :amqp, RuoteAMQP::Participant, :reply_by_default => true )
   #
-  # Sending a message example
+  # Sending a message example to a specific queue
   #
   #   Ruote.process_definition do
   #     sequence do
@@ -48,15 +61,24 @@ module RuoteAMQP
   #     end
   #   end
   #
-  # Sending a workitem
+  # Sending a workitem to the remote participant defined above
   #
   #   Ruote.process_definition do
   #     sequence do
-  #       amqp :queue => 'test'
+  #       delete_user
   #     end
   #   end
   #
-  # Let the participant reply to the engine without involving the listener
+  # Sending a workitem to a specific queue
+  #
+  #   Ruote.process_definition do
+  #     sequence do
+  #       amqp :queue => 'test', :command => '/run/regression_test'
+  #     end
+  #   end
+  #
+  # Let the local participant reply to the engine without involving
+  # the receiver
   #
   #   Ruote.process_definition do
   #     sequence do
@@ -66,14 +88,7 @@ module RuoteAMQP
   #
   # When waiting for a reply it only makes sense to send a workitem.
   #
-  # == Workitem modifications
-  #
-  # To ease replies, an additional workitem attribute is set:
-  #
-  #   'reply_queue'
-  #
-  # +reply_queue+ has the name of the queue where the RuoteAMQP::Listener
-  # expects replies from remote participants
+  # Note: +reply_queue+ is now deprecated.
   #
   # == AMQP notes
   #
