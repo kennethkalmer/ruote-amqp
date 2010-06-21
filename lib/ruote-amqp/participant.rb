@@ -14,14 +14,24 @@ module RuoteAMQP
   # leverage an extremely powerful local/remote participant
   # combinations.
   #
-  # The local part of the RuoteAMQP::Participant relies on the
-  # presence of an RuoteAMQP::Receiver. Workitems are sent to the
-  # remote participant and the local part does not normally reply to
-  # the engine.
+  # For local/remote participants The local part of the
+  # RuoteAMQP::Participant relies on the presence of a
+  # RuoteAMQP::Receiver. Workitems are sent to the remote participant
+  # and the local part does not normally reply to the engine.  Instead
+  # the engine will continue when a reply is received on the
+  # 'ruote_workitems' queue (see RuoteAMQP::Receiver).
   #
-  # For 'fire and forget' usage the local participant can be
-  # configured to reply to the engine immediately after queueing a
-  # message.
+  # Of course, the standard :forget => true format can be used even
+  # with remote particpants and :forget can even be set as a default in
+  # the options.
+  #
+  # A simple way to create a remote participant to act upon workitems
+  # is to use the daemon-kit ruote responder.
+  #
+  # Simple AMQP messages are treated as 'fire and forget' and the flow
+  # will continue when the local participant has queued the message
+  # for sending. (As there is no meaningful way to receive a workitem
+  # in reply).
   #
   # == Configuration
   #
@@ -31,16 +41,11 @@ module RuoteAMQP
   #
   # == Usage
   #
-  # Currently it's possible to send either workitems or messages
-  # directly to a specific queue, and have the engine wait for
-  # replies on the 'ruote_workitems' queue (see RuoteAMQP::Receiver).
+  # Define the command and queue used by a process step:
   #
-  # Setting up the participant
-  #
-  #   engine.register_participant(
-  #     :amqp, RuoteAMQP::Participant )
-  #
-  # Define the command and queue used by a process step
+  # (This will call the delete method in the User class in a
+  # daemon-kit ruote client that is listening to the user_manager
+  # queue.)
   #
   #   engine.register_participant(
   #     :delete_user, RuoteAMQP::Participant,
@@ -48,33 +53,11 @@ module RuoteAMQP
   #     :command => '/user/delete'
   #     )
   #
-  # Setup a 'fire and forget' participant that always replies to the
-  # engine:
-  #
-  #   engine.register_participant(
-  #     :amqp, RuoteAMQP::Participant, :reply_by_default => true )
-  #
-  # Sending a message example to a specific queue
-  #
-  #   Ruote.process_definition do
-  #     sequence do
-  #       amqp :queue => 'test', :message => 'foo'
-  #     end
-  #   end
-  #
-  # Sending a workitem to the remote participant defined above
+  # Sending a workitem to the remote participant defined above:
   #
   #   Ruote.process_definition do
   #     sequence do
   #       delete_user
-  #     end
-  #   end
-  #
-  # Sending a workitem to a specific queue
-  #
-  #   Ruote.process_definition do
-  #     sequence do
-  #       amqp :queue => 'test', :command => '/run/regression_test'
   #     end
   #   end
   #
@@ -83,11 +66,39 @@ module RuoteAMQP
   #
   #   Ruote.process_definition do
   #     sequence do
-  #       amqp :queue => 'test', :reply_anyway => true
+  #       delete_user :forget => true
   #     end
   #   end
   #
-  # When waiting for a reply it only makes sense to send a workitem.
+  # Setting up the participant in a slightly more 'raw' way:
+  #
+  #   engine.register_participant(
+  #     :amqp, RuoteAMQP::Participant )
+  #
+  # Sending a workitem to a specific queue:
+  #
+  #   Ruote.process_definition do
+  #     sequence do
+  #       amqp :queue => 'test', :command => '/run/regression_test'
+  #     end
+  #   end
+  #
+  # Setup a 'fire and forget' participant that always replies to the
+  # engine:
+  #
+  #   engine.register_participant(
+  #     :jfdi, RuoteAMQP::Participant, :forget => true )
+  #
+  # Sending a message example to a specific queue (both steps are
+  # equivalent):
+  #
+  #   Ruote.process_definition do
+  #     sequence do
+  #       amqp :queue => 'test', :message => 'foo'
+  #       amqp :queue => 'test', :message => 'foo', :forget => true
+  #     end
+  #   end
+  #
   #
   # Note: +reply_queue+ is now deprecated.
   #
@@ -105,18 +116,28 @@ module RuoteAMQP
 
     include Ruote::LocalParticipant
 
-    # Accepts an options hash with the following keys:
+    # The following parameters are used in the process definition.
     #
-    # * :reply_by_default => (bool) false by default
-    # * :default_queue => (string) nil by default
+    # An options hash with the same keys to provide defaults is
+    # accepted at registration time (see above).
+    #
+    # * :queue => (string) The AMQP queue used by the remote participant.
+    #   nil by default.
+    # * :command => (string) An optional command string. Daemon-kit
+    #   participants use this to identify the class/method to be called.
+    #   nil by default
+    # * :forget => (bool) Whether the flow should block until the remote
+    #   participant replies.
+    #   false by default
     #
     def initialize( options )
 
       RuoteAMQP.start!
 
       @options = {
-        'reply_by_default' => false,
-        'default_queue' => nil
+        'queue' => nil
+        'command' => nil,
+        'forget' => false,
       }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
         #
         # the inject is here to make sure that all options have String keys
@@ -127,14 +148,11 @@ module RuoteAMQP
     # workitem parameter. You can specify a +message+ workitem
     # parameter to have that sent instead of the workitem.
     #
-    # To force the participant to reply to the engine, set the
-    # +reply_anyway+ workitem parameter.
-    #
     def consume( workitem )
       if target_queue = determine_queue( workitem )
 
         q = MQ.queue( target_queue, :durable => true )
-
+        forget = false
         opts = {
           :persistent => RuoteAMQP.use_persistent_messages?,
           :content_type => 'application/json' }
@@ -142,22 +160,26 @@ module RuoteAMQP
         # Message or workitem?
         if message = ( workitem.fields['message'] || workitem.fields['params']['message'] )
           q.publish( message, opts )
+          forget = true # Always reply once the message is sent.
         else
-          # If it's a workitem and there's a command override, use it
-          # otherwise use the options command if there is one
+          # If it's a workitem and there's a command/forget override, use it
+          # otherwise use the options command/forget if there is one
           if @options.has_key? 'command'
             workitem.params['command'] = @options['command'] if 
               ! workitem.params.has_key? 'command'
+          end
+          if @options.has_key? 'forget' and ! workitem.params.has_key? 'forget'
+            # If there's a true/false :forget param then dispatch will
+            # have "done the right thing". If it is in @options
+            # however we need to fake a 'forget' by replying at once.
+            forget = workitem.params['forget'] = @options['forget']
           end
           q.publish( encode_workitem( workitem ), opts )
         end
       else
         raise "no queue in workitem params!"
       end
-
-      if @options['reply_by_default'] || workitem.fields['params']['reply_anyway'] == true
-        reply_to_engine( workitem )
-      end
+      reply_to_engine( workitem ) if forget
     end
 
     def stop
@@ -175,7 +197,7 @@ module RuoteAMQP
 
     def determine_queue( workitem )
 
-      workitem.fields['params']['queue'] || @options['default_queue']|| @options['queue']
+      workitem.params['queue'] || @options['queue']
     end
 
     # Encode the workitem as JSON
