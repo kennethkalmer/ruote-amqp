@@ -138,6 +138,12 @@ module RuoteAMQP
         if message = ( workitem.fields['message'] || workitem.fields['params']['message'] )
           q.publish( message, opts )
         else
+          # If it's a workitem and there's a command override, use it
+          # otherwise use the options command if there is one
+          if @options.has_key? 'command'
+            workitem.params['command'] = @options['command'] if 
+              ! workitem.params.has_key? 'command'
+          end
           q.publish( encode_workitem( workitem ), opts )
         end
       else
@@ -164,7 +170,7 @@ module RuoteAMQP
 
     def determine_queue( workitem )
 
-      workitem.fields['params']['queue'] || @options['default_queue']
+      workitem.fields['params']['queue'] || @options['default_queue']|| @options['queue']
     end
 
     # Encode the workitem as JSON
