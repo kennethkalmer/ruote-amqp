@@ -3,16 +3,16 @@ module RuoteSpecHelpers
 
   def purge_engine
 
-    #@engine.context.values.each do |s|
-    #  s.purge if s.respond_to?(:purge)
-    #end
+    # TODO : adapt to ruote 2.1.10
   end
 
   def run_definition( pdef )
 
     wfid = @engine.launch( pdef )
 
-    @engine.wait_for( wfid )
+    r = @engine.wait_for( wfid )
+    @engine.wait_for( wfid ) if r['action'] == 'ceased'
+      # make sure to wait for 'terminated'
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
@@ -21,6 +21,7 @@ module RuoteSpecHelpers
   end
 
   def noisy( on = true )
+
     @engine.context.logger.noisy = on
   end
 end

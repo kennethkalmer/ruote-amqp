@@ -100,8 +100,6 @@ module RuoteAMQP
   #   end
   #
   #
-  # Note: +reply_queue+ is now deprecated.
-  #
   # == AMQP notes
   #
   # The participant currently only makes use of direct
@@ -135,7 +133,7 @@ module RuoteAMQP
       RuoteAMQP.start!
 
       @options = {
-        'queue' => nil
+        'queue' => nil,
         'command' => nil,
         'forget' => false,
       }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
@@ -149,40 +147,43 @@ module RuoteAMQP
     # parameter to have that sent instead of the workitem.
     #
     def consume( workitem )
-      if target_queue = determine_queue( workitem )
 
-        q = MQ.queue( target_queue, :durable => true )
-        forget = false
-        opts = {
-          :persistent => RuoteAMQP.use_persistent_messages?,
-          :content_type => 'application/json' }
+      target_queue = determine_queue( workitem )
 
-        # Message or workitem?
-        if message = ( workitem.fields['message'] || workitem.fields['params']['message'] )
-          q.publish( message, opts )
-          forget = true # Always reply once the message is sent.
-        else
-          # If it's a workitem and there's a command/forget override, use it
-          # otherwise use the options command/forget if there is one
-          if @options.has_key? 'command'
-            workitem.params['command'] = @options['command'] if 
-              ! workitem.params.has_key? 'command'
-          end
-          if @options.has_key? 'forget' and ! workitem.params.has_key? 'forget'
-            # If there's a true/false :forget param then dispatch will
-            # have "done the right thing". If it is in @options
-            # however we need to fake a 'forget' by replying at once.
-            forget = workitem.params['forget'] = @options['forget']
-          end
-          q.publish( encode_workitem( workitem ), opts )
-        end
+      raise 'no queue specified (outbound delivery)' unless target_queue
+
+      q = MQ.queue( target_queue, :durable => true )
+      forget = determine_forget( workitem )
+
+      opts = {
+        :persistent => RuoteAMQP.use_persistent_messages?,
+        :content_type => 'application/json' }
+
+      if message = workitem.fields['message'] || workitem.params['message']
+
+        forget = true # sending a message implies 'forget' => true
+
+        q.publish( message, opts )
+
       else
-        raise "no queue in workitem params!"
+
+        # If it's a workitem and there's a command/forget override, use it
+        # otherwise use the options command/forget if there is one
+        if @options.has_key? 'command'
+          workitem.params['command'] = @options['command'] if
+            ! workitem.params.has_key? 'command'
+        end
+
+        q.publish( encode_workitem( workitem ), opts )
       end
+
       reply_to_engine( workitem ) if forget
     end
 
+    # (Stops the underlying queue subscription)
+    #
     def stop
+
       RuoteAMQP.stop!
     end
 
@@ -194,6 +195,13 @@ module RuoteAMQP
     end
 
     private
+
+    def determine_forget( workitem )
+
+      return workitem.params['forget'] if workitem.params.has_key?( 'forget' )
+      return @options['forget'] if @options.has_key?( 'forget' )
+      false
+    end
 
     def determine_queue( workitem )
 
@@ -208,3 +216,4 @@ module RuoteAMQP
     end
   end
 end
+
