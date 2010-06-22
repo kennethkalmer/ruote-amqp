@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
      "lib/ruote-amqp/launchitem_listener.rb",
      "lib/ruote-amqp/participant.rb",
      "lib/ruote-amqp/receiver.rb",
+     "lib/ruote-amqp/version.rb",
      "lib/ruote-amqp/workitem_listener.rb",
      "lib/spec/ruote.rb",
      "lib/spec/ruote_example_group.rb",
