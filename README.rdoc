@@ -26,9 +26,8 @@ Please review the rdoc in RuoteAMQP::Participant and Ruote::AMQP::Listener
 
 == REQUIREMENTS:
 
-* ruote[http://ruote.rubyforge.org] 2.1.4 or later
+* ruote[http://ruote.rubyforge.org] 2.1.10 or later
 * amqp[http://github.com/tmm1/amqp] 0.6.6 or later
-* rufus-json[http://github.com/jmettraux/rufus-json] 0.1.0 or later
 * rabbitmq[http://www.rabbitmq.com/] 1.6.0 or later
 
 == INSTALL:

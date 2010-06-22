@@ -41,11 +41,35 @@ task :spec #=> :check_dependencies
 
 task :default => :spec
 
-begin
-  require 'yard'
-  YARD::Rake::YardocTask.new
-rescue LoadError
-  task :yardoc do
-    abort "YARD is not available. In order to run yardoc, you must: sudo gem install yard"
-  end
+#begin
+#  require 'yard'
+#  YARD::Rake::YardocTask.new
+#rescue LoadError
+#  task :yardoc do
+#    abort "YARD is not available. In order to run yardoc, you must: sudo gem install yard"
+#  end
+#end
+
+require 'rake/clean'
+CLEAN.include('pkg', 'tmp', 'html', 'rdoc')
+
+#
+# make sure to have rdoc 2.5.x to run that
+#
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rd|
+  rd.main = 'README.rdoc'
+  rd.rdoc_dir = 'rdoc/ruote-amqp_rdoc'
+  rd.rdoc_files.include('README.rdoc', 'lib/**/*.rb')
+  rd.title = "ruote-amqp #{RuoteAMQP::VERSION}"
 end
+
+
+task :upload_website => [ :clean, :rdoc ] do
+
+  account = 'jmettraux@rubyforge.org'
+  webdir = '/var/www/gforge-projects/ruote'
+
+  sh "rsync -azv -e ssh rdoc/ruote-amqp_rdoc #{account}:#{webdir}/"
+end
+
