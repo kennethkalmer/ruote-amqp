@@ -1,6 +1,10 @@
 
 require 'mq'
 
+require 'ruote-amqp/version'
+
+
+#
 # AMQP participant and listener pair for ruote.
 #
 # == Documentation
@@ -15,8 +19,6 @@ require 'mq'
 # to be restarted in order for messages to be resent.
 #
 module RuoteAMQP
-
-  VERSION = '2.1.10'
 
   autoload 'Participant',        'ruote-amqp/participant'
 

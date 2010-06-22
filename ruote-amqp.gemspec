@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["kenneth.kalmer@gmail.com"]
-  s.date = %q{2010-06-17}
+  s.date = %q{2010-06-22}
   s.email = %q{kenneth.kalmer@gmail.com}
   s.extra_rdoc_files = [
     "History.txt",
@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
      "lib/ruote-amqp.rb",
      "lib/ruote-amqp/launchitem_listener.rb",
      "lib/ruote-amqp/participant.rb",
+     "lib/ruote-amqp/receiver.rb",
      "lib/ruote-amqp/workitem_listener.rb",
      "lib/spec/ruote.rb",
      "lib/spec/ruote_example_group.rb",
@@ -40,6 +41,7 @@ Gem::Specification.new do |s|
      "script/generate",
      "spec/launchitem_listener_spec.rb",
      "spec/participant_spec.rb",
+     "spec/receiver_spec.rb",
      "spec/ruote_amqp_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
@@ -53,6 +55,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/launchitem_listener_spec.rb",
      "spec/participant_spec.rb",
+     "spec/receiver_spec.rb",
      "spec/ruote_amqp_spec.rb",
      "spec/spec_helper.rb",
      "spec/workitem_listener_spec.rb"

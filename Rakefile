@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rake'
 
-require 'lib/ruote-amqp'
+require 'lib/ruote-amqp/version'
 
 begin
   require 'jeweler'
