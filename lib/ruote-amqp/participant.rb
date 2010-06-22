@@ -41,17 +41,10 @@ module RuoteAMQP
   #
   # == Usage
   #
-  # Define the command and queue used by a process step:
-  #
-  # (This will call the delete method in the User class in a
-  # daemon-kit ruote client that is listening to the user_manager
-  # queue.)
+  # Define the queue used by an AMQP participant :
   #
   #   engine.register_participant(
-  #     :delete_user, RuoteAMQP::Participant,
-  #     :queue => 'user_manager',
-  #     :command => '/user/delete'
-  #     )
+  #     :delete_user, RuoteAMQP::Participant, 'queue' => 'user_manager')
   #
   # Sending a workitem to the remote participant defined above:
   #
@@ -79,7 +72,7 @@ module RuoteAMQP
   #
   #   Ruote.process_definition do
   #     sequence do
-  #       amqp :queue => 'test', :command => '/run/regression_test'
+  #       amqp :queue => 'test', 'command' => '/run/regression_test'
   #     end
   #   end
   #
@@ -87,7 +80,7 @@ module RuoteAMQP
   # engine:
   #
   #   engine.register_participant(
-  #     :jfdi, RuoteAMQP::Participant, :forget => true )
+  #     :jfdi, RuoteAMQP::Participant, 'forget' => true )
   #
   # Sending a message example to a specific queue (both steps are
   # equivalent):
@@ -121,9 +114,6 @@ module RuoteAMQP
     #
     # * :queue => (string) The AMQP queue used by the remote participant.
     #   nil by default.
-    # * :command => (string) An optional command string. Daemon-kit
-    #   participants use this to identify the class/method to be called.
-    #   nil by default
     # * :forget => (bool) Whether the flow should block until the remote
     #   participant replies.
     #   false by default
@@ -134,7 +124,6 @@ module RuoteAMQP
 
       @options = {
         'queue' => nil,
-        'command' => nil,
         'forget' => false,
       }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
         #
@@ -166,13 +155,6 @@ module RuoteAMQP
         q.publish( message, opts )
 
       else
-
-        # If it's a workitem and there's a command/forget override, use it
-        # otherwise use the options command/forget if there is one
-        if @options.has_key? 'command'
-          workitem.params['command'] = @options['command'] if
-            ! workitem.params.has_key? 'command'
-        end
 
         q.publish( encode_workitem( workitem ), opts )
       end
@@ -208,9 +190,13 @@ module RuoteAMQP
       workitem.params['queue'] || @options['queue']
     end
 
-    # Encode the workitem as JSON
+    # Encodes the workitem as JSON. Makes sure to add to the field 'params'
+    # an entry named 'participant_options' which contains the options of
+    # this participant.
     #
     def encode_workitem( wi )
+
+      wi.params['participant_options'] = @options
 
       Rufus::Json.encode( wi.to_h )
     end

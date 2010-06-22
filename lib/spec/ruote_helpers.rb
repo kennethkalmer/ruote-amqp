@@ -10,9 +10,10 @@ module RuoteSpecHelpers
 
     wfid = @engine.launch( pdef )
 
-    r = @engine.wait_for( wfid )
-    @engine.wait_for( wfid ) if r['action'] == 'ceased'
-      # make sure to wait for 'terminated'
+    #r = @engine.wait_for( wfid )
+    #@engine.wait_for( wfid ) if r['action'] == 'ceased'
+    #  # make sure to wait for 'terminated'
+    @engine.wait_for( :inactive )
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions

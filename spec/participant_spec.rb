@@ -120,7 +120,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     begin
       Timeout::timeout(5) do
         @msg = nil
-        MQ.queue('test5').subscribe { |msg| @msg = msg }
+        MQ.queue( 'test5' ).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -130,6 +130,40 @@ describe RuoteAMQP::Participant, :type => :ruote do
     rescue Timeout::Error
       violated "Timeout waiting for message"
     end
+  end
+
+  it "should pass 'participant_options' over amqp" do
+
+    pdef = ::Ruote.process_definition :name => 'test' do
+      amqp :queue => 'test6', :forget => true
+    end
+
+    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+
+    run_definition( pdef )
+
+    msg = nil
+
+    begin
+      Timeout::timeout( 10 ) do
+
+        MQ.queue( 'test6' ).subscribe { |m| msg = m }
+
+        loop do
+          break unless msg.nil?
+          sleep 0.1
+        end
+      end
+    rescue Timeout::Error
+      violated "Timeout waiting for message"
+    end
+
+    wi = Rufus::Json.decode( msg )
+    params = wi['fields']['params']
+
+    params['queue'].should == 'test6'
+    params['forget'].should == true
+    params['participant_options'].should == { 'forget' => false, 'queue' => nil }
   end
 end
 
