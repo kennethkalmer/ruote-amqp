@@ -17,7 +17,7 @@ describe RuoteAMQP::WorkitemListener do
       set :field => 'foo', :value => 'foo'
       sequence do
         echo '${f:foo}'
-        amqp :queue => 'test3'
+        amqp :queue => 'test7'
         echo '${f:foo}'
       end
     end
@@ -33,10 +33,7 @@ describe RuoteAMQP::WorkitemListener do
 
         @msg = nil
 
-        MQ.queue('test3').unsubscribe
-        sleep 0.3
-
-        MQ.queue('test3').subscribe { |msg| @msg = msg }
+        MQ.queue( 'test7' ).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
