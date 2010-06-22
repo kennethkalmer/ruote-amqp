@@ -142,7 +142,7 @@ module RuoteAMQP
       raise 'no queue specified (outbound delivery)' unless target_queue
 
       q = MQ.queue( target_queue, :durable => true )
-      forget = determine_forget( workitem )
+      @forget = determine_forget( workitem )
 
       opts = {
         :persistent => RuoteAMQP.use_persistent_messages?,
@@ -150,7 +150,7 @@ module RuoteAMQP
 
       if message = workitem.fields['message'] || workitem.params['message']
 
-        forget = true # sending a message implies 'forget' => true
+        @forget = true # sending a message implies 'forget' => true
 
         q.publish( message, opts )
 
@@ -159,7 +159,7 @@ module RuoteAMQP
         q.publish( encode_workitem( workitem ), opts )
       end
 
-      reply_to_engine( workitem ) if forget
+      reply_to_engine( workitem ) if @forget
     end
 
     # (Stops the underlying queue subscription)
@@ -197,6 +197,7 @@ module RuoteAMQP
     def encode_workitem( wi )
 
       wi.params['participant_options'] = @options
+      wi.params['forget'] = @forget
 
       Rufus::Json.encode( wi.to_h )
     end
