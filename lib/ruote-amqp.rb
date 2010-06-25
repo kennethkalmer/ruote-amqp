@@ -51,7 +51,7 @@ module RuoteAMQP
         }
       end
 
-      mutex.synchronize { cv.wait(mutex) }
+      mutex.synchronize { cv.wait( mutex ) }
 
       MQ.prefetch(1)
 

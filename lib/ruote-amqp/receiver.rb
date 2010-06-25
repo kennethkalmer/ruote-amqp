@@ -100,9 +100,9 @@ module RuoteAMQP
 
       item = Rufus::Json.decode( msg ) rescue nil
 
-      return unless item.is_a?(Hash)
+      return unless item.is_a?( Hash )
 
-      not_li = ! item.has_key?('definition')
+      not_li = ! item.has_key?( 'definition' )
 
       return if @launchitems == :only && not_li
       return unless @launchitems || not_li
@@ -116,7 +116,7 @@ module RuoteAMQP
 
     def launch( hash )
 
-      super(hash['definition'], hash['fields'] || {}, hash['variables'] || {})
+      super( hash['definition'], hash['fields'] || {}, hash['variables'] || {} )
     end
   end
 end
