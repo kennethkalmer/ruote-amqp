@@ -33,7 +33,7 @@ describe RuoteAMQP::WorkitemListener do
 
         @msg = nil
 
-        MQ.queue( 'test7' ).subscribe { |msg| @msg = msg }
+        MQ.queue( 'test7', :durable => true ).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?

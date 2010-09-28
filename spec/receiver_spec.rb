@@ -25,9 +25,9 @@ describe RuoteAMQP::Receiver do
     wfid = @engine.launch pdef
 
     begin
-      Timeout::timeout(5) do
+      Timeout::timeout( 5 ) do
         @msg = nil
-        MQ.queue('test3').subscribe { |msg| @msg = msg }
+        MQ.queue( 'test3', :durable => true ).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
