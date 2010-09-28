@@ -125,6 +125,7 @@ module RuoteAMQP
       @options = {
         'queue' => nil,
         'forget' => false,
+        'reply_queue' => 'ruote_workitems'
       }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
         #
         # the inject is here to make sure that all options have String keys
