@@ -71,9 +71,9 @@ module RuoteAMQP
 
       @launchitems = opts[:launchitems]
 
-      @queue = 'ruote_workitems'
-      @queue = 'ruote_launchitems' if @launchitems == :only
-      @queue = opts[:queue] if opts[:queue]
+      @queue =
+        opts[:queue] ||
+        @launchitems == :only ? 'ruote_launchitems' : 'ruote_workitems'
 
       RuoteAMQP.start!
 

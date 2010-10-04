@@ -12,6 +12,7 @@ module RuoteAMQP
     #
     # @param [ Ruote::Engine, Ruote::Storage ] A configured ruote engine or storage instance
     # @param [ String ] An optional queue name
+    #
     def initialize( engine_or_storage, queue = nil )
 
       super( engine_or_storage, :queue => queue )
