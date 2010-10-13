@@ -1,6 +1,7 @@
-ruote-amqp TODO
-===============
+
+= ruote-amqp
 
 [o] Launch processes over AMQP (LaunchitemListener)
 [o] Receiver
+[ ] ParticipantProxy ?
 

@@ -15,10 +15,10 @@ begin
     gemspec.extra_rdoc_files.include '*.txt'
 
     gemspec.add_dependency 'amqp', '>= 0.6.7'
-    gemspec.add_dependency 'ruote', '>= 2.1.10'
+    gemspec.add_dependency 'ruote', '>= 2.1.11'
       # ruote depends on rufus-json
 
-    gemspec.add_development_dependency 'rspec'
+    gemspec.add_development_dependency 'rspec', '>= 2.0.0'
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -65,7 +65,7 @@ Rake::RDocTask.new do |rd|
 end
 
 
-task :upload_website => [ :clean, :rdoc ] do
+task :upload_rdoc => [ :clean, :rdoc ] do
 
   account = 'jmettraux@rubyforge.org'
   webdir = '/var/www/gforge-projects/ruote'
