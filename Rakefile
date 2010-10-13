@@ -15,7 +15,7 @@ begin
     gemspec.extra_rdoc_files.include '*.txt'
 
     gemspec.add_dependency 'amqp', '>= 0.6.7'
-    gemspec.add_dependency 'ruote', '>= 2.1.11'
+    gemspec.add_dependency 'ruote', ">= #{RuoteAMQP::VERSION}"
       # ruote depends on rufus-json
 
     gemspec.add_development_dependency 'rspec', '>= 2.0.0'
