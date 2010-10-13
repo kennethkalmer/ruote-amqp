@@ -8,14 +8,14 @@ module RuoteAMQP
   #
   # = AMQP Participants
   #
-  # The RuoteAMQP::Participant allows you to send workitems (serialized as
+  # The RuoteAMQP::ParticipantProxy allows you to send workitems (serialized as
   # JSON) or messages to any AMQP queues right from the process
   # definition. When combined with the RuoteAMQP::Receiver you can easily
   # leverage an extremely powerful local/remote participant
   # combinations.
   #
   # For local/remote participants The local part of the
-  # RuoteAMQP::Participant relies on the presence of a
+  # RuoteAMQP::ParticipantProxy relies on the presence of a
   # RuoteAMQP::Receiver. Workitems are sent to the remote participant
   # and the local part does not normally reply to the engine.  Instead
   # the engine will continue when a reply is received on the
@@ -44,7 +44,7 @@ module RuoteAMQP
   # Define the queue used by an AMQP participant :
   #
   #   engine.register_participant(
-  #     :delete_user, RuoteAMQP::Participant, 'queue' => 'user_manager')
+  #     :delete_user, RuoteAMQP::ParticipantProxy, 'queue' => 'user_manager')
   #
   # Sending a workitem to the remote participant defined above:
   #
@@ -66,7 +66,7 @@ module RuoteAMQP
   # Setting up the participant in a slightly more 'raw' way:
   #
   #   engine.register_participant(
-  #     :amqp, RuoteAMQP::Participant )
+  #     :amqp, RuoteAMQP::ParticipantProxy )
   #
   # Sending a workitem to a specific queue:
   #
@@ -80,7 +80,7 @@ module RuoteAMQP
   # engine:
   #
   #   engine.register_participant(
-  #     :jfdi, RuoteAMQP::Participant, 'forget' => true )
+  #     :jfdi, RuoteAMQP::ParticipantProxy, 'forget' => true )
   #
   # Sending a message example to a specific queue (both steps are
   # equivalent):
@@ -103,7 +103,7 @@ module RuoteAMQP
   # participant, and messages are marked as persistent by default (see
   # #RuoteAMQP)
   #
-  class Participant
+  class ParticipantProxy
 
     include Ruote::LocalParticipant
 
@@ -199,6 +199,22 @@ module RuoteAMQP
       wi.params['participant_options'] = @options
 
       Rufus::Json.encode( wi.to_h )
+    end
+  end
+
+  #
+  # Kept for backward compatibility.
+  #
+  # You should use RuoteAMQP::ParticipantProxy.
+  #
+  class Participant < ParticipantProxy
+
+    def initialize( options )
+      puts '=' * 80
+      puts "RuoteAMQP::Participant will be deprecated soon (2.1.12)"
+      puts "please use RuoteAMQP::ParticipantProxy instead"
+      puts '=' * 80
+      super
     end
   end
 end

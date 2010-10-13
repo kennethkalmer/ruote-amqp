@@ -3,5 +3,5 @@
 
 [o] Launch processes over AMQP (LaunchitemListener)
 [o] Receiver
-[ ] ParticipantProxy ?
+[o] ParticipantProxy ?
 

@@ -18,7 +18,7 @@ describe RuoteAMQP::Receiver do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
 
     RuoteAMQP::Receiver.new( @engine )
 

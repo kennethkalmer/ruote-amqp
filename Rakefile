@@ -60,7 +60,8 @@ require 'rake/rdoctask'
 Rake::RDocTask.new do |rd|
   rd.main = 'README.rdoc'
   rd.rdoc_dir = 'rdoc/ruote-amqp_rdoc'
-  rd.rdoc_files.include('README.rdoc', 'lib/**/*.rb')
+  rd.rdoc_files.include(
+    'README.rdoc', 'CHANGELOG.txt', 'lib/**/*.rb')
   rd.title = "ruote-amqp #{RuoteAMQP::VERSION}"
 end
 

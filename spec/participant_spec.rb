@@ -2,7 +2,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 
-describe RuoteAMQP::Participant, :type => :ruote do
+describe RuoteAMQP::ParticipantProxy, :type => :ruote do
 
   it "should support 'forget' as participant attribute" do
 
@@ -13,7 +13,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
 
     run_definition( pdef )
 
@@ -46,7 +46,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::Participant, 'forget' => true )
+      :amqp, RuoteAMQP::ParticipantProxy, 'forget' => true )
 
     run_definition( pdef )
 
@@ -78,7 +78,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
 
     run_definition( pdef )
 
@@ -111,7 +111,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::Participant, 'queue' => 'test5' )
+      :amqp, RuoteAMQP::ParticipantProxy, 'queue' => 'test5' )
 
     run_definition( pdef )
 
@@ -138,7 +138,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
       amqp :queue => 'test6', :forget => true
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
 
     run_definition( pdef )
 
