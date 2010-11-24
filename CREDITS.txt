@@ -14,6 +14,7 @@
 
 * weifeng - https://github.com/weifeng365
 * David Greaves - https://github.com/lbt
+* Hartog C. de Mik - https://github.com/coffeeaddict
 * Torsten Schoenebaum - https://github.com/tosch
 * Jordan Ritter - https://github.com/jpr5
 * Charles Magid - https://github.com/ChasManRors
