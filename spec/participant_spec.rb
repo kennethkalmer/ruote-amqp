@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe RuoteAMQP::ParticipantProxy, :type => :ruote do
 
-  it "should support 'forget' as participant attribute" do
+  it "supports 'forget' as participant attribute" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -36,7 +36,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
-  it "should support 'forget' as participant option" do
+  it "supports 'forget' as participant option" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -69,7 +69,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
-  it "should support custom messages instead of workitems" do
+  it "supports custom messages instead of workitems" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -101,7 +101,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     @msg.should == 'foo'
   end
 
-  it "should support 'queue' as a participant option" do
+  it "supports 'queue' as a participant option" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -132,7 +132,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     end
   end
 
-  it "should pass 'participant_options' over amqp" do
+  it "passes 'participant_options' over amqp" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       amqp :queue => 'test6', :forget => true
@@ -166,7 +166,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     params['participant_options'].should == { 'forget' => false, 'queue' => nil }
   end
 
-  it "shouldn't create 1 queue instance per delivery" do
+  it "doesn't create 1 queue instance per delivery" do
 
     pdef = ::Ruote.process_definition do
       amqp :queue => 'test7', :forget => true

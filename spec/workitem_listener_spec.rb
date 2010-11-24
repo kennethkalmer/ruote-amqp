@@ -13,7 +13,7 @@ describe RuoteAMQP::WorkitemListener do
     purge_engine
   end
 
-  it "should handle replies" do
+  it "handles replies" do
 
     pdef = Ruote.process_definition :name => 'test' do
       set :field => 'foo', :value => 'foo'

@@ -8,7 +8,7 @@ describe RuoteAMQP::Receiver do
     purge_engine
   end
 
-  it "should handle replies" do
+  it "handles replies" do
 
     pdef = Ruote.process_definition :name => 'test' do
       set :field => 'foo', :value => 'foo'
@@ -56,19 +56,17 @@ describe RuoteAMQP::Receiver do
     @tracer.to_s.should == "foo\nbar"
   end
 
-  it "should launch processes" do
+  it "launches processes" do
 
     json = {
-      "definition" => "
+      'definition' => %{
         Ruote.process_definition :name => 'test' do
           sequence do
             echo '${f:foo}'
           end
         end
-      ",
-      "fields" => {
-        "foo" => "bar"
-      }
+      },
+      'fields' => { 'foo' => 'bar' }
     }.to_json
 
     RuoteAMQP::Receiver.new(@engine, :launchitems => true)
@@ -80,7 +78,7 @@ describe RuoteAMQP::Receiver do
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
 
-    @tracer.to_s.should == "bar"
+    @tracer.to_s.should == 'bar'
   end
 end
 
