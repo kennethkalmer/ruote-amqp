@@ -18,7 +18,7 @@
 * Jordan Ritter - https://github.com/jpr5
 * Charles Magid - https://github.com/ChasManRors
 * Marc Mauger - https://github.com/simianarmy
-* Jason
+* Jason - https://github.com/asm
 
 
 == FEEDBACK
