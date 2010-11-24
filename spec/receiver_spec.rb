@@ -1,8 +1,5 @@
 
-require File.dirname(__FILE__) + '/spec_helper'
-
-# rspec clobbering global space... :(
-undef :context if defined?(:context)
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 
 describe RuoteAMQP::Receiver do

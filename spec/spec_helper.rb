@@ -1,9 +1,9 @@
-require 'rubygems'
-gem 'rspec'
-require 'spec'
 
-$:.unshift(File.dirname(__FILE__) + '/../lib')
-$:.unshift('../ruote/lib')
+require 'rubygems'
+require 'rspec'
+
+$:.unshift(File.join(File.dirname(__FILE__), '../lib'))
+$:.unshift(File.join(File.dirname(__FILE__), '../../ruote/lib'))
 
 gem 'amqp', '=0.6.7'
 
@@ -16,7 +16,10 @@ require 'ruote/storage/hash_storage'
 require 'ruote/log/test_logger'
 
 require 'ruote-amqp'
-require 'spec/ruote'
+
+Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |path|
+  require(path)
+}
 
 
 # AMQP magic worked here
@@ -27,9 +30,9 @@ AMQP.settings[:pass]  = 'ruote'
 
 #AMQP.logging = true
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
 
-  config.include( RuoteSpecHelpers )
+  config.include(RuoteSpecHelpers)
 
   config.before(:each) do
     @tracer = Tracer.new
@@ -37,10 +40,7 @@ Spec::Runner.configure do |config|
     @engine = Ruote::Engine.new(
       Ruote::Worker.new(
         Ruote::HashStorage.new(
-          's_logger' => [ 'ruote/log/test_logger', 'Ruote::TestLogger' ]
-        )
-      )
-    )
+          's_logger' => [ 'ruote/log/test_logger', 'Ruote::TestLogger' ])))
 
     @engine.add_service( 'tracer', @tracer )
   end

@@ -1,15 +1,17 @@
 
-require File.dirname(__FILE__) + '/spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 #
 # NOTE : RuoteAMQP::WorkitemListener has been depreacted in favour of
 #        RuoteAMQP::Receiver
 #
 
-# rspec clobbering global space... :(
-#undef :context if defined?(:context)
 
 describe RuoteAMQP::WorkitemListener do
+
+  after(:each) do
+    purge_engine
+  end
 
   it "should handle replies" do
 
@@ -55,8 +57,6 @@ describe RuoteAMQP::WorkitemListener do
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "foo\nbar"
-
-    purge_engine
   end
 end
 
