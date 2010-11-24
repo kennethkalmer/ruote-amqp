@@ -22,9 +22,9 @@ describe RuoteAMQP::LaunchitemListener do
       }
     }.to_json
 
-    RuoteAMQP::LaunchitemListener.new( @engine )
+    RuoteAMQP::LaunchitemListener.new(@engine)
 
-    MQ.queue( 'ruote_launchitems' ).publish( json )
+    MQ.queue('ruote_launchitems').publish(json)
 
     sleep 0.5
 

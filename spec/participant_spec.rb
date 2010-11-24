@@ -13,16 +13,16 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout( 10 ) do
+      Timeout::timeout(10) do
         @msg = nil
-        MQ.queue( 'test1', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test1', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -33,7 +33,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    @msg.should match( /^\{.*\}$/ ) # JSON message by default
+    @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
   it "should support 'forget' as participant option" do
@@ -46,16 +46,16 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::ParticipantProxy, 'forget' => true )
+      :amqp, RuoteAMQP::ParticipantProxy, 'forget' => true)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == "done."
 
     begin
-      Timeout::timeout( 5 ) do
+      Timeout::timeout(5) do
         @msg = nil
-        MQ.queue( 'test4', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test4', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -66,7 +66,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    @msg.should match( /^\{.*\}$/) # JSON message by default
+    @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
   it "should support custom messages instead of workitems" do
@@ -78,16 +78,16 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == "done."
 
     begin
-      Timeout::timeout( 5 ) do
+      Timeout::timeout(5) do
         @msg = nil
-        MQ.queue( 'test2', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test2', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -111,16 +111,16 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::ParticipantProxy, 'queue' => 'test5' )
+      :amqp, RuoteAMQP::ParticipantProxy, 'queue' => 'test5')
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout( 5 ) do
+      Timeout::timeout(5) do
         @msg = nil
-        MQ.queue( 'test5', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test5', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -138,16 +138,16 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       amqp :queue => 'test6', :forget => true
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     msg = nil
 
     begin
-      Timeout::timeout( 10 ) do
+      Timeout::timeout(10) do
 
-        MQ.queue( 'test6', :durable => true ).subscribe { |m| msg = m }
+        MQ.queue('test6', :durable => true).subscribe { |m| msg = m }
 
         loop do
           break unless msg.nil?
@@ -158,7 +158,7 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    wi = Rufus::Json.decode( msg )
+    wi = Rufus::Json.decode(msg)
     params = wi['fields']['params']
 
     params['queue'].should == 'test6'

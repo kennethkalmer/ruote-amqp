@@ -118,14 +118,16 @@ module RuoteAMQP
     #   participant replies.
     #   false by default
     #
-    def initialize( options )
+    def initialize(options)
 
       RuoteAMQP.start!
 
       @options = {
         'queue' => nil,
         'forget' => false,
-      }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
+      }.merge(options.inject({}) { |h, (k, v)|
+        h[k.to_s] = v; h
+      })
         #
         # the inject is here to make sure that all options have String keys
     end
@@ -135,14 +137,14 @@ module RuoteAMQP
     # workitem parameter. You can specify a +message+ workitem
     # parameter to have that sent instead of the workitem.
     #
-    def consume( workitem )
+    def consume(workitem)
 
-      target_queue = determine_queue( workitem )
+      target_queue = determine_queue(workitem)
 
       raise 'no queue specified (outbound delivery)' unless target_queue
 
-      q = MQ.queue( target_queue, :durable => true )
-      forget = determine_forget( workitem )
+      q = MQ.queue(target_queue, :durable => true)
+      forget = determine_forget(workitem)
 
       opts = {
         :persistent => RuoteAMQP.use_persistent_messages?,
@@ -152,14 +154,14 @@ module RuoteAMQP
 
         forget = true # sending a message implies 'forget' => true
 
-        q.publish( message, opts )
+        q.publish(message, opts)
 
       else
 
-        q.publish( encode_workitem( workitem ), opts )
+        q.publish(encode_workitem(workitem), opts)
       end
 
-      reply_to_engine( workitem ) if forget
+      reply_to_engine(workitem) if forget
     end
 
     # (Stops the underlying queue subscription)
@@ -169,7 +171,7 @@ module RuoteAMQP
       RuoteAMQP.stop!
     end
 
-    def cancel( fei, flavour )
+    def cancel(fei, flavour)
       #
       # TODO : sending a cancel item is not a bad idea, especially if the
       #        job done over the amqp fence lasts...
@@ -178,14 +180,14 @@ module RuoteAMQP
 
     private
 
-    def determine_forget( workitem )
+    def determine_forget(workitem)
 
-      return workitem.params['forget'] if workitem.params.has_key?( 'forget' )
-      return @options['forget'] if @options.has_key?( 'forget' )
+      return workitem.params['forget'] if workitem.params.has_key?('forget')
+      return @options['forget'] if @options.has_key?('forget')
       false
     end
 
-    def determine_queue( workitem )
+    def determine_queue(workitem)
 
       workitem.params['queue'] || @options['queue']
     end
@@ -194,11 +196,11 @@ module RuoteAMQP
     # an entry named 'participant_options' which contains the options of
     # this participant.
     #
-    def encode_workitem( wi )
+    def encode_workitem(wi)
 
       wi.params['participant_options'] = @options
 
-      Rufus::Json.encode( wi.to_h )
+      Rufus::Json.encode(wi.to_h)
     end
   end
 
@@ -209,7 +211,7 @@ module RuoteAMQP
   #
   class Participant < ParticipantProxy
 
-    def initialize( options )
+    def initialize(options)
       puts '=' * 80
       puts "RuoteAMQP::Participant will be deprecated soon (2.1.12)"
       puts "please use RuoteAMQP::ParticipantProxy instead"

@@ -26,7 +26,7 @@ module RuoteAMQP
   #
   # Register the engine or storage with the listener:
   #
-  #   RuoteAMQP::Receiver.new( engine_or_storage )
+  #   RuoteAMQP::Receiver.new(engine_or_storage)
   #
   # The workitem listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
@@ -65,9 +65,9 @@ module RuoteAMQP
     #   :launchitems => :only
     #     # the receiver only accepts launchitems
     #
-    def initialize( engine_or_storage, opts = {} )
+    def initialize(engine_or_storage, opts={})
 
-      super( engine_or_storage )
+      super(engine_or_storage)
 
       @launchitems = opts[:launchitems]
 
@@ -77,14 +77,14 @@ module RuoteAMQP
 
       RuoteAMQP.start!
 
-      MQ.queue( @queue ).unsubscribe # taking over...
+      MQ.queue(@queue).unsubscribe # taking over...
       sleep 0.3
 
-      MQ.queue( @queue, :durable => true ).subscribe do |message|
+      MQ.queue(@queue, :durable => true).subscribe do |message|
         if AMQP.closing?
           # do nothing, we're going down
         else
-          handle( message )
+          handle(message)
         end
       end
     end
@@ -96,27 +96,27 @@ module RuoteAMQP
 
     private
 
-    def handle( msg )
+    def handle(msg)
 
-      item = Rufus::Json.decode( msg ) rescue nil
+      item = Rufus::Json.decode(msg) rescue nil
 
-      return unless item.is_a?( Hash )
+      return unless item.is_a?(Hash)
 
-      not_li = ! item.has_key?( 'definition' )
+      not_li = ! item.has_key?('definition')
 
       return if @launchitems == :only && not_li
       return unless @launchitems || not_li
 
       if not_li
-        receive( item ) # workitem resumes in its process instance
+        receive(item) # workitem resumes in its process instance
       else
-        launch( item ) # new process instance launch
+        launch(item) # new process instance launch
       end
     end
 
-    def launch( hash )
+    def launch(hash)
 
-      super( hash['definition'], hash['fields'] || {}, hash['variables'] || {} )
+      super(hash['definition'], hash['fields'] || {}, hash['variables'] || {})
     end
   end
 end

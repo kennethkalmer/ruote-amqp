@@ -4,7 +4,7 @@ RSpec::Matchers.define :have_errors do |*args|
   match do |engine|
 
     @ps = if wfid = args.shift
-      engine.processes( wfid )
+      engine.processes(wfid)
     else
       engine.processes.first
     end

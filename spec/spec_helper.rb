@@ -42,7 +42,7 @@ RSpec.configure do |config|
         Ruote::HashStorage.new(
           's_logger' => [ 'ruote/log/test_logger', 'Ruote::TestLogger' ])))
 
-    @engine.add_service( 'tracer', @tracer )
+    @engine.add_service('tracer', @tracer)
   end
 
   config.after(:each) do
@@ -51,9 +51,9 @@ RSpec.configure do |config|
   end
 
   config.after(:all) do
-    base = File.expand_path( File.dirname(__FILE__) + '/..' )
-    FileUtils.rm_rf( base + '/logs' )
-    FileUtils.rm_rf( base + '/work' )
+    base = File.expand_path(File.dirname(__FILE__) + '/..')
+    FileUtils.rm_rf(base + '/logs')
+    FileUtils.rm_rf(base + '/work')
   end
 end
 
@@ -75,3 +75,4 @@ class Tracer
     @trace << "#{s}\n"
   end
 end
+

@@ -4,6 +4,10 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe RuoteAMQP::Receiver do
 
+  after(:each) do
+    purge_engine
+  end
+
   it "should handle replies" do
 
     pdef = Ruote.process_definition :name => 'test' do
@@ -15,16 +19,16 @@ describe RuoteAMQP::Receiver do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    RuoteAMQP::Receiver.new( @engine )
+    RuoteAMQP::Receiver.new(@engine)
 
     wfid = @engine.launch pdef
 
     begin
-      Timeout::timeout( 5 ) do
+      Timeout::timeout(5) do
         @msg = nil
-        MQ.queue( 'test3', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test3', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -35,19 +39,17 @@ describe RuoteAMQP::Receiver do
       violated "Timeout waiting for message"
     end
 
-    wi = Ruote::Workitem.new( Rufus::Json.decode( @msg ) )
+    wi = Ruote::Workitem.new(Rufus::Json.decode(@msg))
     wi.fields['foo'] = "bar"
 
-    MQ.queue( 'ruote_workitems' ).publish( Rufus::Json.encode( wi.to_h ) )
+    MQ.queue('ruote_workitems').publish(Rufus::Json.encode(wi.to_h))
 
-    @engine.wait_for( wfid )
+    @engine.wait_for(wfid)
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "foo\nbar"
-
-    purge_engine
   end
 
   it "should launch processes" do
@@ -64,9 +66,9 @@ describe RuoteAMQP::Receiver do
       }
     }.to_json
 
-    RuoteAMQP::Receiver.new( @engine, :launchitems => true )
+    RuoteAMQP::Receiver.new(@engine, :launchitems => true)
 
-    MQ.queue( 'ruote_workitems' ).publish( json )
+    MQ.queue('ruote_workitems').publish(json)
 
     sleep 0.5
 
@@ -74,8 +76,6 @@ describe RuoteAMQP::Receiver do
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "bar"
-
-    purge_engine
   end
 end
 

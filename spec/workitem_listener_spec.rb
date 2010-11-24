@@ -24,9 +24,9 @@ describe RuoteAMQP::WorkitemListener do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::ParticipantProxy )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    RuoteAMQP::WorkitemListener.new( @engine )
+    RuoteAMQP::WorkitemListener.new(@engine)
 
     wfid = @engine.launch pdef
 
@@ -35,7 +35,7 @@ describe RuoteAMQP::WorkitemListener do
 
         @msg = nil
 
-        MQ.queue( 'test7', :durable => true ).subscribe { |msg| @msg = msg }
+        MQ.queue('test7', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -46,12 +46,12 @@ describe RuoteAMQP::WorkitemListener do
       violated "Timeout waiting for message"
     end
 
-    wi = Ruote::Workitem.new( Rufus::Json.decode( @msg ) )
+    wi = Ruote::Workitem.new(Rufus::Json.decode(@msg))
     wi.fields['foo'] = "bar"
 
-    MQ.queue( 'ruote_workitems' ).publish( Rufus::Json.encode( wi.to_h ) )
+    MQ.queue('ruote_workitems').publish(Rufus::Json.encode(wi.to_h))
 
-    @engine.wait_for( wfid )
+    @engine.wait_for(wfid)
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
