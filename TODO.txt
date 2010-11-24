@@ -1,7 +1,7 @@
 
-= ruote-amqp
-
 [o] Launch processes over AMQP (LaunchitemListener)
 [o] Receiver
 [o] ParticipantProxy ?
+
+[ ] have a class method ParticipantProxy.stop_all ?
 

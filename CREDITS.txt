@@ -1,0 +1,25 @@
+
+= CREDITS
+
+(probably incomplete, don't hesitate to tell us if a mention is missing)
+
+
+== AUTHORS
+
+* Kenneth Kalmer - http://www.opensourcery.co.za/
+* John Mettraux - https://github.com/jmettraux
+
+
+== CONTRIBUTORS
+
+* weifeng - https://github.com/weifeng365
+* David Greaves - https://github.com/lbt
+* Torsten Schoenebaum - https://github.com/tosch
+* Jordan Ritter - https://github.com/jpr5
+* Charles Magid - https://github.com/ChasManRors
+* Marc Mauger - https://github.com/simianarmy
+* Jason
+
+
+== FEEDBACK
+

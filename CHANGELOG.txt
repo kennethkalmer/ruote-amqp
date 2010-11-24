@@ -1,6 +1,10 @@
 
 = ruote-amqp
 
+
+== 2.1.11 not yet released
+
+- 1 MQ per dispatch thread 'leak' fix. Thanks weifeng365
 - RuoteAMQP::Participant --> RuoteAMQP::ParticipantProxy
 
 

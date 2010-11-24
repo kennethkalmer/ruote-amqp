@@ -178,6 +178,24 @@ module RuoteAMQP
       #
     end
 
+    # The current AMQP (0.6.7) has 1 queue per thread. If you let the default
+    # "one thread per participant consume call" kick in, you'll end up with
+    # 1 queue per consume call (and...)
+    #
+    # So, by returning true here, we force the queue to be always the same.
+    #
+    # Many thanks to https://github.com/weifeng365 for reporting this issue
+    # and suggesting the fix.
+    #
+    # TODO : should we have something to close queues when the engine / worker
+    #        shuts down ?
+    #        or is it already covered in the #stop ?
+    #
+    def do_not_thread
+
+      true
+    end
+
     private
 
     def determine_forget(workitem)

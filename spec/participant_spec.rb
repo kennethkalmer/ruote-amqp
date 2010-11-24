@@ -165,5 +165,28 @@ describe RuoteAMQP::ParticipantProxy, :type => :ruote do
     params['forget'].should == true
     params['participant_options'].should == { 'forget' => false, 'queue' => nil }
   end
+
+  it "shouldn't create 1 queue instance per delivery" do
+
+    pdef = ::Ruote.process_definition do
+      amqp :queue => 'test7', :forget => true
+    end
+
+    mq_count = 0
+    ObjectSpace.each_object(MQ) { |o| mq_count += 1 }
+
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
+
+    10.times do
+      run_definition(pdef)
+    end
+
+    sleep 1
+
+    count = 0
+    ObjectSpace.each_object(MQ) { |o| count += 1 }
+
+    count.should == mq_count + 1
+  end
 end
 
