@@ -9,19 +9,20 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["kenneth.kalmer@gmail.com"]
-  s.date = %q{2010-10-13}
+  s.date = %q{2010-12-10}
   s.email = %q{kenneth.kalmer@gmail.com}
   s.extra_rdoc_files = [
-    "History.txt",
-     "Manifest.txt",
+    "CHANGELOG.txt",
+     "CREDITS.txt",
      "PostInstall.txt",
      "README.rdoc",
      "TODO.txt"
   ]
   s.files = [
     ".gitignore",
-     "History.txt",
-     "Manifest.txt",
+     ".rspec",
+     "CHANGELOG.txt",
+     "CREDITS.txt",
      "PostInstall.txt",
      "README.rdoc",
      "Rakefile",
@@ -32,10 +33,6 @@ Gem::Specification.new do |s|
      "lib/ruote-amqp/receiver.rb",
      "lib/ruote-amqp/version.rb",
      "lib/ruote-amqp/workitem_listener.rb",
-     "lib/spec/ruote.rb",
-     "lib/spec/ruote_example_group.rb",
-     "lib/spec/ruote_helpers.rb",
-     "lib/spec/ruote_matchers.rb",
      "ruote-amqp.gemspec",
      "script/console",
      "script/destroy",
@@ -44,8 +41,9 @@ Gem::Specification.new do |s|
      "spec/participant_spec.rb",
      "spec/receiver_spec.rb",
      "spec/ruote_amqp_spec.rb",
-     "spec/spec.opts",
      "spec/spec_helper.rb",
+     "spec/support/ruote_helpers.rb",
+     "spec/support/ruote_matchers.rb",
      "spec/workitem_listener_spec.rb"
   ]
   s.homepage = %q{http://github.com/kennethkalmer/ruote-amqp}
@@ -59,6 +57,8 @@ Gem::Specification.new do |s|
      "spec/receiver_spec.rb",
      "spec/ruote_amqp_spec.rb",
      "spec/spec_helper.rb",
+     "spec/support/ruote_helpers.rb",
+     "spec/support/ruote_matchers.rb",
      "spec/workitem_listener_spec.rb"
   ]
 
@@ -69,16 +69,16 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<amqp>, [">= 0.6.7"])
       s.add_runtime_dependency(%q<ruote>, [">= 2.1.11"])
-      s.add_development_dependency(%q<rspec>, [">= 2.0.0"])
+      s.add_development_dependency(%q<rspec>, [">= 2.1.0"])
     else
       s.add_dependency(%q<amqp>, [">= 0.6.7"])
       s.add_dependency(%q<ruote>, [">= 2.1.11"])
-      s.add_dependency(%q<rspec>, [">= 2.0.0"])
+      s.add_dependency(%q<rspec>, [">= 2.1.0"])
     end
   else
     s.add_dependency(%q<amqp>, [">= 0.6.7"])
     s.add_dependency(%q<ruote>, [">= 2.1.11"])
-    s.add_dependency(%q<rspec>, [">= 2.0.0"])
+    s.add_dependency(%q<rspec>, [">= 2.1.0"])
   end
 end
 
