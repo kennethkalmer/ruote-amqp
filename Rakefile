@@ -4,38 +4,57 @@ require 'rake'
 
 require 'lib/ruote-amqp/version'
 
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gemspec|
-    gemspec.name = 'ruote-amqp'
-    gemspec.version = RuoteAMQP::VERSION
-    gemspec.summary = 'AMQP participant/listener pair for ruote 2.1'
-    gemspec.email = 'kenneth.kalmer@gmail.com'
-    gemspec.homepage = 'http://github.com/kennethkalmer/ruote-amqp'
-    gemspec.authors = ['kenneth.kalmer@gmail.com']
-    gemspec.extra_rdoc_files.include '*.txt'
 
-    gemspec.add_dependency 'amqp', '>= 0.6.7'
-    gemspec.add_dependency 'ruote', ">= #{RuoteAMQP::VERSION}"
-      # ruote depends on rufus-json
+#
+# GEM
 
-    gemspec.add_development_dependency 'rspec', '>= 2.1.0'
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler not available. Install it with 'gem install jeweler'"
+require 'jeweler'
+
+Jeweler::Tasks.new do |gemspec|
+
+  gemspec.name = 'ruote-amqp'
+  gemspec.version = RuoteAMQP::VERSION
+  gemspec.summary = 'AMQP participant/listener pair for ruote 2.1'
+
+  gemspec.description = %{
+    AMQP participant/listener pair for ruote 2.1'
+  }
+
+  gemspec.email = 'kenneth.kalmer@gmail.com'
+  gemspec.homepage = 'http://github.com/kennethkalmer/ruote-amqp'
+  gemspec.authors = [ 'kenneth.kalmer@gmail.com', 'jmettraux@gmail.com' ]
+  gem.rubyforge_project = 'ruote'
+  gemspec.extra_rdoc_files.include '*.txt'
+
+  gemspec.add_dependency 'amqp', '>= 0.6.7'
+  gemspec.add_dependency 'ruote', ">= #{RuoteAMQP::VERSION}"
+    # ruote depends on rufus-json
+
+  gemspec.add_development_dependency 'rspec', '>= 2.1.0'
 end
+Jeweler::GemcutterTasks.new
+
+
+#
+# TEST / SPEC
 
 #task :spec => :check_dependencies do
 task :spec do
   sh 'rspec spec/'
 end
 
-
 task :default => :spec
+
+
+#
+# CLEAN
 
 require 'rake/clean'
 CLEAN.include('pkg', 'tmp', 'html', 'rdoc')
+
+
+#
+# DOC
 
 #
 # make sure to have rdoc 2.5.x to run that
@@ -49,6 +68,9 @@ Rake::RDocTask.new do |rd|
   rd.title = "ruote-amqp #{RuoteAMQP::VERSION}"
 end
 
+
+#
+# TO THE WEB
 
 task :upload_rdoc => [ :clean, :rdoc ] do
 
