@@ -112,6 +112,21 @@ module RuoteAMQP
       else
         launch(item) # new process instance launch
       end
+
+    rescue => e
+      # something went wrong
+      # let's simply discard the message
+      $stderr.puts('=' * 80)
+      $stderr.puts(self.class.name)
+      $stderr.puts("couldn't handle incoming message :")
+      $stderr.puts('')
+      $stderr.puts(msg.inspect)
+      $stderr.puts('')
+      $stderr.puts(Rufus::Json.pretty_encode(item)) rescue nil
+      $stderr.puts('')
+      $stderr.puts(e.inspect)
+      $stderr.puts(e.backtrace)
+      $stderr.puts('=' * 80)
     end
 
     def launch(hash)

@@ -12,6 +12,7 @@
 
 == CONTRIBUTORS
 
+* Victor Liu - https://github.com/pennymax
 * weifeng - https://github.com/weifeng365
 * David Greaves - https://github.com/lbt
 * Hartog C. de Mik - https://github.com/coffeeaddict
