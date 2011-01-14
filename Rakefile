@@ -1,100 +1,82 @@
 
-$:.unshift('.') # 1.9.2
-
 require 'rubygems'
-
 require 'rake'
-require 'rake/clean'
-require 'rake/rdoctask'
+
+require 'lib/ruote-amqp/version'
 
 
 #
-# clean
+# GEM
 
-CLEAN.include('pkg', 'rdoc')
+require 'jeweler'
+
+Jeweler::Tasks.new do |gemspec|
+
+  gemspec.name = 'ruote-amqp'
+  gemspec.version = RuoteAMQP::VERSION
+  gemspec.summary = 'AMQP participant/listener pair for ruote 2.1'
+
+  gemspec.description = %{
+    AMQP participant/listener pair for ruote 2.1'
+  }
+
+  gemspec.email = 'kenneth.kalmer@gmail.com'
+  gemspec.homepage = 'http://github.com/kennethkalmer/ruote-amqp'
+  gemspec.authors = [ 'kenneth.kalmer@gmail.com', 'jmettraux@gmail.com' ]
+  gem.rubyforge_project = 'ruote'
+  gemspec.extra_rdoc_files.include '*.txt'
+
+  gemspec.add_dependency 'amqp', '>= 0.6.7'
+  gemspec.add_dependency 'ruote', ">= #{RuoteAMQP::VERSION}"
+    # ruote depends on rufus-json
+
+  gemspec.add_development_dependency 'rspec', '>= 2.1.0'
+end
+Jeweler::GemcutterTasks.new
 
 
 #
-# test / spec
+# TEST / SPEC
 
+#task :spec => :check_dependencies do
 task :spec do
-
   sh 'rspec spec/'
 end
 
-task :test => [ :spec ]
-task :default => [ :spec ]
+task :default => :spec
 
 
 #
-# gem
+# CLEAN
 
-GEMSPEC_FILE = Dir['*.gemspec'].first
-GEMSPEC = eval(File.read(GEMSPEC_FILE))
-GEMSPEC.validate
-
-
-desc %{
-  builds the gem and places it in pkg/
-}
-task :build do
-
-  sh "gem build #{GEMSPEC_FILE}"
-  sh "mkdir pkg" rescue nil
-  sh "mv #{GEMSPEC.name}-#{GEMSPEC.version}.gem pkg/"
-end
-
-desc %{
-  builds the gem and pushes it to rubygems.org
-}
-task :push => :build do
-
-  sh "gem push pkg/#{GEMSPEC.name}-#{GEMSPEC.version}.gem"
-end
+require 'rake/clean'
+CLEAN.include('pkg', 'tmp', 'html', 'rdoc')
 
 
 #
-# rabbitmq preparation
+# DOC
 
-desc %{
-  prepare RabbitMQ (vhost, user, perms)
-}
-task :prepare do
-
-  sh "rabbitmqctl add_vhost ruote-test"
-  sh "rabbitmqctl add_user ruote ruote"
-  sh "rabbitmqctl set_permissions -p ruote-test ruote '.*' '.*' '.*'"
-end
-
-
-#
-# rdoc
 #
 # make sure to have rdoc 2.5.x to run that
-
+#
+require 'rake/rdoctask'
 Rake::RDocTask.new do |rd|
-
   rd.main = 'README.rdoc'
-  rd.rdoc_dir = 'rdoc'
-
+  rd.rdoc_dir = 'rdoc/ruote-amqp_rdoc'
   rd.rdoc_files.include(
-    'README.rdoc', 'CHANGELOG.txt', 'CREDITS.txt', 'lib/**/*.rb')
-
-  rd.title = "#{GEMSPEC.name} #{GEMSPEC.version}"
+    'README.rdoc', 'CHANGELOG.txt', 'lib/**/*.rb')
+  rd.title = "ruote-amqp #{RuoteAMQP::VERSION}"
 end
 
 
 #
-# upload_rdoc
+# TO THE WEB
 
-desc %{
-  upload the rdoc to rubyforge
-}
 task :upload_rdoc => [ :clean, :rdoc ] do
 
   account = 'jmettraux@rubyforge.org'
   webdir = '/var/www/gforge-projects/ruote'
 
-  sh "rsync -azv -e ssh rdoc/#{GEMSPEC.name}_rdoc #{account}:#{webdir}/"
+  sh "rsync -azv -e ssh rdoc/ruote-amqp_rdoc #{account}:#{webdir}/"
 end
 
