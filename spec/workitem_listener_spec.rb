@@ -53,7 +53,7 @@ describe RuoteAMQP::WorkitemListener do
 
     workitem.fields['foo'] = 'bar'
 
-    MQ.queue('ruote_workitems').publish(Rufus::Json.encode(workitem.to_h))
+    MQ.queue('ruote_workitems', :durable => true).publish(Rufus::Json.encode(workitem.to_h), :persistent => true)
 
     @engine.wait_for(wfid)
 

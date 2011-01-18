@@ -46,7 +46,7 @@ describe RuoteAMQP::Receiver do
 
     workitem.fields['foo'] = "bar"
 
-    MQ.queue('ruote_workitems').publish(Rufus::Json.encode(workitem.to_h))
+    MQ.queue('ruote_workitems', :durable => true).publish(Rufus::Json.encode(workitem.to_h), :persistent => true)
 
     @engine.wait_for(wfid)
 
@@ -71,7 +71,7 @@ describe RuoteAMQP::Receiver do
 
     RuoteAMQP::Receiver.new(@engine, :launchitems => true)
 
-    MQ.queue('ruote_workitems').publish(json)
+    MQ.queue('ruote_workitems', :durable => true).publish(json, :persistent => true)
 
     sleep 0.5
 
