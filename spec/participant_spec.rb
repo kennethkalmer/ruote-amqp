@@ -1,10 +1,10 @@
 
-require File.dirname(__FILE__) + '/spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 
-describe RuoteAMQP::Participant, :type => :ruote do
+describe RuoteAMQP::ParticipantProxy, :type => :ruote do
 
-  it "should support 'forget' as participant attribute" do
+  it "supports 'forget' as participant attribute" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -13,16 +13,16 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == 'done.'
 
     begin
-      Timeout::timeout( 10 ) do
+      Timeout::timeout(10) do
         @msg = nil
-        MQ.queue( 'test1' ).subscribe { |msg| @msg = msg }
+        MQ.queue('test1', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -33,10 +33,10 @@ describe RuoteAMQP::Participant, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    @msg.should match( /^\{.*\}$/ ) # JSON message by default
+    @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
-  it "should support 'forget' as participant option" do
+  it "supports 'forget' as participant option" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -46,16 +46,16 @@ describe RuoteAMQP::Participant, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::Participant, 'forget' => true )
+      :amqp, RuoteAMQP::ParticipantProxy, 'forget' => true)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == "done."
 
     begin
       Timeout::timeout(5) do
         @msg = nil
-        MQ.queue('test4').subscribe { |msg| @msg = msg }
+        MQ.queue('test4', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -66,10 +66,10 @@ describe RuoteAMQP::Participant, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    @msg.should match( /^\{.*\}$/) # JSON message by default
+    @msg.should match(/^\{.*\}$/) # JSON message by default
   end
 
-  it "should support custom messages instead of workitems" do
+  it "supports custom messages instead of workitems" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -78,16 +78,16 @@ describe RuoteAMQP::Participant, :type => :ruote do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == "done."
 
     begin
       Timeout::timeout(5) do
         @msg = nil
-        MQ.queue('test2').subscribe { |msg| @msg = msg }
+        MQ.queue('test2', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -101,7 +101,7 @@ describe RuoteAMQP::Participant, :type => :ruote do
     @msg.should == 'foo'
   end
 
-  it "should support 'queue' as a participant option" do
+  it "supports 'queue' as a participant option" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       sequence do
@@ -111,16 +111,16 @@ describe RuoteAMQP::Participant, :type => :ruote do
     end
 
     @engine.register_participant(
-      :amqp, RuoteAMQP::Participant, 'queue' => 'test5' )
+      :amqp, RuoteAMQP::ParticipantProxy, 'queue' => 'test5')
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     @tracer.to_s.should == 'done.'
 
     begin
       Timeout::timeout(5) do
         @msg = nil
-        MQ.queue( 'test5' ).subscribe { |msg| @msg = msg }
+        MQ.queue('test5', :durable => true).subscribe { |msg| @msg = msg }
 
         loop do
           break unless @msg.nil?
@@ -132,22 +132,22 @@ describe RuoteAMQP::Participant, :type => :ruote do
     end
   end
 
-  it "should pass 'participant_options' over amqp" do
+  it "passes 'participant_options' over amqp" do
 
     pdef = ::Ruote.process_definition :name => 'test' do
       amqp :queue => 'test6', :forget => true
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    run_definition( pdef )
+    run_definition(pdef)
 
     msg = nil
 
     begin
-      Timeout::timeout( 10 ) do
+      Timeout::timeout(10) do
 
-        MQ.queue( 'test6' ).subscribe { |m| msg = m }
+        MQ.queue('test6', :durable => true).subscribe { |m| msg = m }
 
         loop do
           break unless msg.nil?
@@ -158,12 +158,35 @@ describe RuoteAMQP::Participant, :type => :ruote do
       violated "Timeout waiting for message"
     end
 
-    wi = Rufus::Json.decode( msg )
+    wi = Rufus::Json.decode(msg)
     params = wi['fields']['params']
 
     params['queue'].should == 'test6'
     params['forget'].should == true
     params['participant_options'].should == { 'forget' => false, 'queue' => nil }
+  end
+
+  it "doesn't create 1 queue instance per delivery" do
+
+    pdef = ::Ruote.process_definition do
+      amqp :queue => 'test7', :forget => true
+    end
+
+    mq_count = 0
+    ObjectSpace.each_object(MQ) { |o| mq_count += 1 }
+
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
+
+    10.times do
+      run_definition(pdef)
+    end
+
+    sleep 1
+
+    count = 0
+    ObjectSpace.each_object(MQ) { |o| count += 1 }
+
+    count.should == mq_count + 1
   end
 end
 

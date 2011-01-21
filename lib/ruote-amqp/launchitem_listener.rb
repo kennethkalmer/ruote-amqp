@@ -11,10 +11,11 @@ module RuoteAMQP
     # Start a new LaunchItem listener
     #
     # @param [ Ruote::Engine, Ruote::Storage ] A configured ruote engine or storage instance
-    # @param [ String ] Optional queue name
-    def initialize( engine_or_storage, queue = nil )
+    # @param opts :queue / :unsubscribe
+    #
+    def initialize(engine_or_storage, opts={})
 
-      super( engine_or_storage, :queue => queue, :launchitems => :only )
+      super(engine_or_storage, opts.merge(:launchitems => :only))
     end
   end
 end

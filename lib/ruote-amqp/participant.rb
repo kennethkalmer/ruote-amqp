@@ -8,14 +8,14 @@ module RuoteAMQP
   #
   # = AMQP Participants
   #
-  # The RuoteAMQP::Participant allows you to send workitems (serialized as
+  # The RuoteAMQP::ParticipantProxy allows you to send workitems (serialized as
   # JSON) or messages to any AMQP queues right from the process
   # definition. When combined with the RuoteAMQP::Receiver you can easily
   # leverage an extremely powerful local/remote participant
   # combinations.
   #
   # For local/remote participants The local part of the
-  # RuoteAMQP::Participant relies on the presence of a
+  # RuoteAMQP::ParticipantProxy relies on the presence of a
   # RuoteAMQP::Receiver. Workitems are sent to the remote participant
   # and the local part does not normally reply to the engine.  Instead
   # the engine will continue when a reply is received on the
@@ -44,7 +44,7 @@ module RuoteAMQP
   # Define the queue used by an AMQP participant :
   #
   #   engine.register_participant(
-  #     :delete_user, RuoteAMQP::Participant, 'queue' => 'user_manager')
+  #     :delete_user, RuoteAMQP::ParticipantProxy, 'queue' => 'user_manager')
   #
   # Sending a workitem to the remote participant defined above:
   #
@@ -66,7 +66,7 @@ module RuoteAMQP
   # Setting up the participant in a slightly more 'raw' way:
   #
   #   engine.register_participant(
-  #     :amqp, RuoteAMQP::Participant )
+  #     :amqp, RuoteAMQP::ParticipantProxy )
   #
   # Sending a workitem to a specific queue:
   #
@@ -80,7 +80,7 @@ module RuoteAMQP
   # engine:
   #
   #   engine.register_participant(
-  #     :jfdi, RuoteAMQP::Participant, 'forget' => true )
+  #     :jfdi, RuoteAMQP::ParticipantProxy, 'forget' => true )
   #
   # Sending a message example to a specific queue (both steps are
   # equivalent):
@@ -103,7 +103,7 @@ module RuoteAMQP
   # participant, and messages are marked as persistent by default (see
   # #RuoteAMQP)
   #
-  class Participant
+  class ParticipantProxy
 
     include Ruote::LocalParticipant
 
@@ -118,14 +118,16 @@ module RuoteAMQP
     #   participant replies.
     #   false by default
     #
-    def initialize( options )
+    def initialize(options)
 
       RuoteAMQP.start!
 
       @options = {
         'queue' => nil,
         'forget' => false,
-      }.merge( options.inject( {} ) { |h, ( k, v )| h[k.to_s] = v; h } )
+      }.merge(options.inject({}) { |h, (k, v)|
+        h[k.to_s] = v; h
+      })
         #
         # the inject is here to make sure that all options have String keys
     end
@@ -135,14 +137,14 @@ module RuoteAMQP
     # workitem parameter. You can specify a +message+ workitem
     # parameter to have that sent instead of the workitem.
     #
-    def consume( workitem )
+    def consume(workitem)
 
-      target_queue = determine_queue( workitem )
+      target_queue = determine_queue(workitem)
 
       raise 'no queue specified (outbound delivery)' unless target_queue
 
-      q = MQ.queue( target_queue, :durable => true )
-      @forget = determine_forget( workitem )
+      q = MQ.queue(target_queue, :durable => true)
+      forget = determine_forget(workitem)
 
       opts = {
         :persistent => RuoteAMQP.use_persistent_messages?,
@@ -150,16 +152,16 @@ module RuoteAMQP
 
       if message = workitem.fields['message'] || workitem.params['message']
 
-        @forget = true # sending a message implies 'forget' => true
+        forget = true # sending a message implies 'forget' => true
 
-        q.publish( message, opts )
+        q.publish(message, opts)
 
       else
 
-        q.publish( encode_workitem( workitem ), opts )
+        q.publish(encode_workitem(workitem), opts)
       end
 
-      reply_to_engine( workitem ) if @forget
+      reply_to_engine(workitem) if forget
     end
 
     # (Stops the underlying queue subscription)
@@ -169,23 +171,41 @@ module RuoteAMQP
       RuoteAMQP.stop!
     end
 
-    def cancel( fei, flavour )
+    def cancel(fei, flavour)
       #
       # TODO : sending a cancel item is not a bad idea, especially if the
       #        job done over the amqp fence lasts...
       #
     end
 
+    # The current AMQP (0.6.7) has 1 queue per thread. If you let the default
+    # "one thread per participant consume call" kick in, you'll end up with
+    # 1 queue per consume call (and...)
+    #
+    # So, by returning true here, we force the queue to be always the same.
+    #
+    # Many thanks to https://github.com/weifeng365 for reporting this issue
+    # and suggesting the fix.
+    #
+    # TODO : should we have something to close queues when the engine / worker
+    #        shuts down ?
+    #        or is it already covered in the #stop ?
+    #
+    def do_not_thread
+
+      true
+    end
+
     private
 
-    def determine_forget( workitem )
+    def determine_forget(workitem)
 
-      return workitem.params['forget'] if workitem.params.has_key?( 'forget' )
-      return @options['forget'] if @options.has_key?( 'forget' )
+      return workitem.params['forget'] if workitem.params.has_key?('forget')
+      return @options['forget'] if @options.has_key?('forget')
       false
     end
 
-    def determine_queue( workitem )
+    def determine_queue(workitem)
 
       workitem.params['queue'] || @options['queue']
     end
@@ -194,12 +214,27 @@ module RuoteAMQP
     # an entry named 'participant_options' which contains the options of
     # this participant.
     #
-    def encode_workitem( wi )
+    def encode_workitem(wi)
 
       wi.params['participant_options'] = @options
-      wi.params['forget'] = @forget
 
-      Rufus::Json.encode( wi.to_h )
+      Rufus::Json.encode(wi.to_h)
+    end
+  end
+
+  #
+  # Kept for backward compatibility.
+  #
+  # You should use RuoteAMQP::ParticipantProxy.
+  #
+  class Participant < ParticipantProxy
+
+    def initialize(options)
+      puts '=' * 80
+      puts "RuoteAMQP::Participant will be deprecated soon (2.1.12)"
+      puts "please use RuoteAMQP::ParticipantProxy instead"
+      puts '=' * 80
+      super
     end
   end
 end

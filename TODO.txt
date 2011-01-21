@@ -1,6 +1,8 @@
-ruote-amqp TODO
-===============
 
 [o] Launch processes over AMQP (LaunchitemListener)
 [o] Receiver
+[o] ParticipantProxy ?
+
+[ ] have a class method ParticipantProxy.stop_all ?
+[ ] use Ruote::Workitem #as_json and #from_json(s)
 

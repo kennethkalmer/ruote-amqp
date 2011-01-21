@@ -1,3 +1,4 @@
+
 = ruote-amqp
 
 * http://github.com/kennethkalmer/ruote-amqp
@@ -27,7 +28,7 @@ Please review the rdoc in RuoteAMQP::Participant and Ruote::AMQP::Listener
 == REQUIREMENTS:
 
 * ruote[http://ruote.rubyforge.org] 2.1.10 or later
-* amqp[http://github.com/tmm1/amqp] 0.6.6 or later
+* amqp[http://github.com/tmm1/amqp] 0.6.7 or later
 * rabbitmq[http://www.rabbitmq.com/] 1.6.0 or later
 
 == INSTALL:
@@ -68,7 +69,7 @@ DaemonKit doesn't currently support ruote 2.1, support is forthcoming.
 
 (The MIT License)
 
-Copyright (c) 2010 Kenneth Kalmer
+Copyright (c) 2010-2011 Kenneth Kalmer
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

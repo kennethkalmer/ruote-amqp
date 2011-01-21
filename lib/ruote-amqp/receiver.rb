@@ -26,7 +26,7 @@ module RuoteAMQP
   #
   # Register the engine or storage with the listener:
   #
-  #   RuoteAMQP::Receiver.new( engine_or_storage )
+  #   RuoteAMQP::Receiver.new(engine_or_storage)
   #
   # The workitem listener leverages the asynchronous nature of the amqp gem,
   # so no timers are setup when initialized.
@@ -65,26 +65,28 @@ module RuoteAMQP
     #   :launchitems => :only
     #     # the receiver only accepts launchitems
     #
-    def initialize( engine_or_storage, opts = {} )
+    def initialize(engine_or_storage, opts={})
 
-      super( engine_or_storage )
+      super(engine_or_storage)
 
       @launchitems = opts[:launchitems]
 
-      @queue = 'ruote_workitems'
-      @queue = 'ruote_launchitems' if @launchitems == :only
-      @queue = opts[:queue] if opts[:queue]
+      @queue =
+        opts[:queue] ||
+        @launchitems == :only ? 'ruote_launchitems' : 'ruote_workitems'
 
       RuoteAMQP.start!
 
-      MQ.queue( @queue ).unsubscribe # taking over...
-      sleep 0.3
+      if opts[:unsubscribe]
+        MQ.queue(@queue, :durable => true).unsubscribe
+        sleep 0.300
+      end
 
-      MQ.queue( @queue, :durable => true ).subscribe do |message|
+      MQ.queue(@queue, :durable => true).subscribe do |message|
         if AMQP.closing?
           # do nothing, we're going down
         else
-          handle( message )
+          handle(message)
         end
       end
     end
@@ -96,9 +98,9 @@ module RuoteAMQP
 
     private
 
-    def handle( msg )
+    def handle(msg)
 
-      item = Rufus::Json.decode( msg ) rescue nil
+      item = Rufus::Json.decode(msg) rescue nil
 
       return unless item.is_a?(Hash)
 
@@ -108,13 +110,28 @@ module RuoteAMQP
       return unless @launchitems || not_li
 
       if not_li
-        receive( item ) # workitem resumes in its process instance
+        receive(item) # workitem resumes in its process instance
       else
-        launch( item ) # new process instance launch
+        launch(item) # new process instance launch
       end
+
+    rescue => e
+      # something went wrong
+      # let's simply discard the message
+      $stderr.puts('=' * 80)
+      $stderr.puts(self.class.name)
+      $stderr.puts("couldn't handle incoming message :")
+      $stderr.puts('')
+      $stderr.puts(msg.inspect)
+      $stderr.puts('')
+      $stderr.puts(Rufus::Json.pretty_encode(item)) rescue nil
+      $stderr.puts('')
+      $stderr.puts(e.inspect)
+      $stderr.puts(e.backtrace)
+      $stderr.puts('=' * 80)
     end
 
-    def launch( hash )
+    def launch(hash)
 
       super(hash['definition'], hash['fields'] || {}, hash['variables'] || {})
     end

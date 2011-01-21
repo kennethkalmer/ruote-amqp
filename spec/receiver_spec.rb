@@ -1,13 +1,14 @@
 
-require File.dirname(__FILE__) + '/spec_helper'
-
-# rspec clobbering global space... :(
-undef :context if defined?(:context)
+require File.join(File.dirname(__FILE__), 'spec_helper')
 
 
 describe RuoteAMQP::Receiver do
 
-  it "should handle replies" do
+  after(:each) do
+    purge_engine
+  end
+
+  it "handles replies" do
 
     pdef = Ruote.process_definition :name => 'test' do
       set :field => 'foo', :value => 'foo'
@@ -18,19 +19,24 @@ describe RuoteAMQP::Receiver do
       end
     end
 
-    @engine.register_participant( :amqp, RuoteAMQP::Participant )
+    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    RuoteAMQP::Receiver.new( @engine )
+    RuoteAMQP::Receiver.new(@engine)
 
-    wfid = @engine.launch pdef
+    wfid = @engine.launch(pdef)
+
+    workitem = nil
 
     begin
       Timeout::timeout(5) do
-        @msg = nil
-        MQ.queue('test3').subscribe { |msg| @msg = msg }
+
+        MQ.queue('test3', :durable => true).subscribe { |msg|
+          wi = Ruote::Workitem.new(Rufus::Json.decode(msg))
+          workitem = wi if wi.wfid == wfid
+        }
 
         loop do
-          break unless @msg.nil?
+          break unless workitem.nil?
           sleep 0.1
         end
       end
@@ -38,47 +44,45 @@ describe RuoteAMQP::Receiver do
       violated "Timeout waiting for message"
     end
 
-    wi = Ruote::Workitem.new( Rufus::Json.decode( @msg ) )
-    wi.fields['foo'] = "bar"
+    workitem.fields['foo'] = "bar"
 
-    MQ.queue( 'ruote_workitems' ).publish( Rufus::Json.encode( wi.to_h ) )
+    MQ.queue('ruote_workitems', :durable => true).publish(Rufus::Json.encode(workitem.to_h), :persistent => true)
 
-    @engine.wait_for( wfid )
+    @engine.wait_for(wfid)
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == "foo\nbar"
-
-    purge_engine
   end
 
-  it "should launch processes" do
+  it "launches processes" do
+
     json = {
-      "definition" => "
+      'definition' => %{
         Ruote.process_definition :name => 'test' do
           sequence do
             echo '${f:foo}'
           end
         end
-      ",
-      "fields" => {
-        "foo" => "bar"
-      }
+      },
+      'fields' => { 'foo' => 'bar' }
     }.to_json
 
-    RuoteAMQP::Receiver.new( @engine, :launchitems => true )
+    RuoteAMQP::Receiver.new(@engine, :launchitems => true, :unsubscribe => true)
 
-    MQ.queue( 'ruote_workitems' ).publish( json )
+    MQ.queue(
+      'ruote_workitems', :durable => true
+    ).publish(
+      json, :persistent => true
+    )
 
     sleep 0.5
 
     @engine.should_not have_errors
     @engine.should_not have_remaining_expressions
 
-    @tracer.to_s.should == "bar"
-
-    purge_engine
+    @tracer.to_s.should == 'bar'
   end
 end
 

@@ -20,7 +20,7 @@ require 'ruote-amqp/version'
 #
 module RuoteAMQP
 
-  autoload 'Participant',        'ruote-amqp/participant'
+  autoload 'ParticipantProxy',   'ruote-amqp/participant'
 
   autoload 'Receiver',           'ruote-amqp/receiver'
   autoload 'WorkitemListener',   'ruote-amqp/workitem_listener'
