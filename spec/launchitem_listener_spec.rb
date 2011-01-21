@@ -46,7 +46,7 @@ describe RuoteAMQP::LaunchitemListener do
       'fields' => { 'foo' => 'bar' }
     }.to_json
 
-    RuoteAMQP::LaunchitemListener.new(@engine)
+    RuoteAMQP::LaunchitemListener.new(@engine, :unsubscribe => true)
 
     serr = String.new
     err = StringIO.new(serr, 'w+')

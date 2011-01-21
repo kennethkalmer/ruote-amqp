@@ -12,6 +12,7 @@
 
 == CONTRIBUTORS
 
+* Sean Johnson - https://github.com/belucid
 * Victor Liu - https://github.com/pennymax
 * weifeng - https://github.com/weifeng365
 * David Greaves - https://github.com/lbt

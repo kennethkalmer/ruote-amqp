@@ -26,7 +26,7 @@ describe RuoteAMQP::WorkitemListener do
 
     @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
 
-    RuoteAMQP::WorkitemListener.new(@engine)
+    RuoteAMQP::WorkitemListener.new(@engine, :unsubscribe => true)
 
     #@engine.noisy = true
 

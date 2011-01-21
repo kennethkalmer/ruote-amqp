@@ -69,9 +69,13 @@ describe RuoteAMQP::Receiver do
       'fields' => { 'foo' => 'bar' }
     }.to_json
 
-    RuoteAMQP::Receiver.new(@engine, :launchitems => true)
+    RuoteAMQP::Receiver.new(@engine, :launchitems => true, :unsubscribe => true)
 
-    MQ.queue('ruote_workitems', :durable => true).publish(json, :persistent => true)
+    MQ.queue(
+      'ruote_workitems', :durable => true
+    ).publish(
+      json, :persistent => true
+    )
 
     sleep 0.5
 
