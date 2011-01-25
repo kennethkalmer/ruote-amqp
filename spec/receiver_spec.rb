@@ -1,6 +1,8 @@
 
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
+require 'ruote/participant'
+
 
 describe RuoteAMQP::Receiver do
 
@@ -83,6 +85,42 @@ describe RuoteAMQP::Receiver do
     @engine.should_not have_remaining_expressions
 
     @tracer.to_s.should == 'bar'
+  end
+
+  it 'accepts a custom :queue' do
+
+    #@engine.noisy = true
+
+    RuoteAMQP::Receiver.new(
+      @engine, :queue => 'mario', :launchitems => true, :unsubscribe => true)
+
+    @engine.register_participant 'alpha', Ruote::StorageParticipant
+
+    json = Rufus::Json.encode({
+      'definition' => "Ruote.define { alpha }"
+    })
+
+    MQ.queue(
+      'ruote_workitems', :durable => true
+    ).publish(
+      json, :persistent => true
+    )
+
+    sleep 1
+
+    @engine.processes.size.should == 0
+      # nothing happened
+
+    MQ.queue(
+      'mario', :durable => true
+    ).publish(
+      json, :persistent => true
+    )
+
+    sleep 1
+
+    @engine.processes.size.should == 1
+      # launch happened
   end
 end
 
