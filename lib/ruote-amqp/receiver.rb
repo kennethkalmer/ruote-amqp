@@ -96,11 +96,18 @@ module RuoteAMQP
       RuoteAMQP.stop!
     end
 
+    # (feel free to overwrite me)
+    #
+    def decode_workitem(msg)
+
+      (Rufus::Json.decode(msg) rescue nil)
+    end
+
     private
 
     def handle(msg)
 
-      item = Rufus::Json.decode(msg) rescue nil
+      item = decode_workitem(msg)
 
       return unless item.is_a?(Hash)
 

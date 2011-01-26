@@ -4,6 +4,7 @@
 
 == 2.1.12 not yet released
 
+- receiver : exposing #decode_workitem for overwriting
 - options[:queue] patch by Mario Camou
 - :durable path by belucid
 - 1 MQ per dispatch thread 'leak' fix. Thanks weifeng365
