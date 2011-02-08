@@ -1,6 +1,6 @@
 
 module RuoteAMQP
 
-  VERSION = '2.1.12'
+  VERSION = '2.2.0'
 end
 
