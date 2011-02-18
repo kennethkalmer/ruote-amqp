@@ -27,7 +27,7 @@ describe RuoteAMQP::LaunchitemListener do
 
     RuoteAMQP::LaunchitemListener.new(@engine)
 
-    MQ.queue('ruote_launchitems').publish(json)
+    MQ.queue('ruote_launchitems', :durable => true).publish(json)
 
     sleep 0.5
 
@@ -52,7 +52,7 @@ describe RuoteAMQP::LaunchitemListener do
     err = StringIO.new(serr, 'w+')
     $stderr = err
 
-    MQ.queue('ruote_launchitems').publish(json)
+    MQ.queue('ruote_launchitems', :durable => true).publish(json)
 
     sleep 0.5
 
