@@ -2,7 +2,7 @@
 = ruote-amqp
 
 
-== 2.2.0 not yet released
+== ruote-amqp - 2.2.0    released 2011/03/01
 
 - receiver : exposing #decode_workitem for overwriting
 - options[:queue] patch by Mario Camou
