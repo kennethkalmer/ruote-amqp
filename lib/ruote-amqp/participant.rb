@@ -120,8 +120,6 @@ module RuoteAMQP
     #
     def initialize(options)
 
-      RuoteAMQP.start!
-
       @options = {
         'queue' => nil,
         'forget' => false,
@@ -138,6 +136,8 @@ module RuoteAMQP
     # parameter to have that sent instead of the workitem.
     #
     def consume(workitem)
+
+      RuoteAMQP.start!
 
       target_queue = determine_queue(workitem)
 
