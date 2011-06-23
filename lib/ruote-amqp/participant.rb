@@ -158,7 +158,9 @@ module RuoteAMQP
 
       else
 
-        q.publish(encode_workitem(workitem), opts)
+        wi = encode_workitem(workitem)
+        raise ArgumentError, "encoded workitem is nil" if wi.nil?
+        q.publish(wi, opts)
       end
 
       reply_to_engine(workitem) if forget
