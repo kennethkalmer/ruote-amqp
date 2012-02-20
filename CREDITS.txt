@@ -27,3 +27,5 @@
 
 == FEEDBACK
 
+* Marco Sehrer - https://github.com/pixelvitamina - ruote 2.2 vs 2.3
+
