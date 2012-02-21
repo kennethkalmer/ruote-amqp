@@ -53,7 +53,8 @@ module Amqp
     def on_workitem
 
       exchange.publish(
-        encode_workitem, :routing_key => opt('routing_key'))
+        opt('message') || encode_workitem,
+        :routing_key => opt('routing_key'))
 
       reply if opt('forget')
     end

@@ -39,11 +39,38 @@ describe Ruote::Amqp::Participant do
     wfid = @dashboard.launch(pdef)
     @dashboard.wait_for(wfid)
 
-    sleep 0.2
+    sleep 0.1
 
     wi['participant_name'].should == 'toto'
   end
 
-  it 'supports custom messages when publishing'
+  it 'supports custom messages when publishing' do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => 'direct/',
+      :routing_key => 'toto',
+      :message => 'hello world!',
+      :forget => true)
+
+    msg = nil
+
+    #AMQP::Channel.new.queue('toto').subscribe do |headers, payload|
+    AMQP::Channel.new.queue('toto').subscribe do |payload|
+      msg = payload
+    end
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for(wfid)
+
+    sleep 0.1
+
+    msg.should == 'hello world!'
+  end
 end
 
