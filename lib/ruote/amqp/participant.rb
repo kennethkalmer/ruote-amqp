@@ -25,9 +25,42 @@ module Ruote
 module Amqp
 
   #
+  # This participant publishes messages on AMQP exchanges.
+  #
   # == options
   #
+  # A few options are supported. They can be declared at 3 levels:
+  #
+  # * options (when the participant is registered)
+  #
+  #   dashboard.register 'amqp_participant', :routing_key => 'nada.x'
+  #
+  # * params (from the process definition)
+  #
+  #   sequence do
+  #     amqp_participant :routing_key => 'nada.x'
+  #   end
+  #
+  # * fields (from the passing workitem)
+  #
+  #   sequence do
+  #     set 'f:routing_key' => 'nada.x'
+  #     amqp_participant
+  #   end
+  #
+  # The 'conf' option (only available at participant registration) decides
+  # which levels are enabled or not.
+  #
+  # By default 'all' levels are enabled.
+  #
   # === 'conf'
+  #
+  # As said above, this option decides who can tweak this participant's
+  # options. It accepts a comma-separated list of levels.
+  #
+  # The levels are "params", "fields", "options". When the option 'field_prefix'
+  # is set, the level "fields" is set implicitely.
+  #
   # === 'connection'
   # === 'exchange'
   # === 'field_prefix'
@@ -44,11 +77,14 @@ module Amqp
   class Participant
     include Ruote::LocalParticipant
 
+    # Initializing the participant, right before calling #on_workitem or
+    # another on_ method.
+    #
     def initialize(options)
 
       @options = options
 
-      @conf = (@options['conf'] || 'options').split(/\s*,\s*/)
+      @conf = (@options['conf'] || 'options, params, fields').split(/\s*,\s*/)
       @conf = %w[ params fields options ] if @conf.include?('all')
       @conf = @conf.inject({}) { |h, e| h[e] = true; h }
       @conf['fields'] = true if @options['field_prefix']
@@ -56,6 +92,8 @@ module Amqp
       @field_prefix = @options['field_prefix'] || ''
     end
 
+    # Workitem consumption code.
+    #
     def on_workitem
 
       exchange.publish(
