@@ -17,6 +17,7 @@ describe Ruote::Amqp::Participant do
 
   after(:each) do
     @dashboard.shutdown
+    @queue.delete rescue nil
   end
 
   it 'publishes messages on the given exchange' do
@@ -25,14 +26,13 @@ describe Ruote::Amqp::Participant do
       :toto,
       Ruote::Amqp::Participant,
       :exchange => 'direct/',
-      :routing_key => 'toto',
+      :routing_key => 'alpha',
       :forget => true)
 
     wi = nil
 
-    AMQP::Channel.new.queue('toto').subscribe do |h, p|
-      wi = Rufus::Json.decode(p)
-    end
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
 
     pdef = Ruote.define do
       toto
@@ -58,9 +58,8 @@ describe Ruote::Amqp::Participant do
 
     msg = nil
 
-    AMQP::Channel.new.queue('alpha').subscribe do |h, p|
-      msg = p
-    end
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| msg = payload }
 
     pdef = Ruote.define do
       alpha
