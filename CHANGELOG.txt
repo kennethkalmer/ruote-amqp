@@ -2,6 +2,11 @@
 = ruote-amqp
 
 
+== ruote-amqp - 2.3.0    not yet released
+
+- blah blah blah
+
+
 == ruote-amqp - 2.2.0    released 2011/03/01
 
 - receiver : exposing #decode_workitem for overwriting

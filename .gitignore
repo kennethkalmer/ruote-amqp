@@ -2,5 +2,6 @@
 work/
 logs/
 pkg/
-.yardoc
 doc/
+.bundle
+.rvmrc
