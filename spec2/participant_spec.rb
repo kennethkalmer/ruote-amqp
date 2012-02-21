@@ -28,16 +28,13 @@ describe Ruote::Amqp::Participant do
 
     wi = nil
 
-    channel = AMQP::Channel.new(AMQP.connection)
-    channel.queue('toto').subscribe do |headers, payload|
+    AMQP::Channel.new.queue('toto').subscribe do |headers, payload|
       wi = Rufus::Json.decode(payload)
     end
 
     pdef = Ruote.define do
       toto
     end
-
-    #@dashboard.noisy = true
 
     wfid = @dashboard.launch(pdef)
     @dashboard.wait_for(wfid)
@@ -46,5 +43,7 @@ describe Ruote::Amqp::Participant do
 
     wi['participant_name'].should == 'toto'
   end
+
+  it 'supports custom messages when publishing'
 end
 

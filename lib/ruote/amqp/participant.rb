@@ -52,14 +52,17 @@ module Amqp
       con = AMQP.connect(par_or_opt('amqp_connection') || {})
       cha = AMQP::Channel.new(con)
 
-      ex = par_or_opt('exchange') || 'direct/'
-      m = ex.match(/^([a-z]+)\/(.*)$/)
+      exn, exo = Array(par_or_opt('exchange')) || [ 'direct/', {} ]
+        #
+        # defaults to the "default exchange"...
+
+      m = exn.match(/^([a-z]+)\/(.*)$/)
 
       raise ArgumentError.new(
         "couldn't determine exchange from #{ex.inspect}"
       ) unless m
 
-      AMQP::Exchange.new(cha, m[1].to_sym, m[2])
+      AMQP::Exchange.new(cha, m[1].to_sym, m[2], exo || {})
     end
 
     def par_or_opt(key, default=nil, &default_block)
