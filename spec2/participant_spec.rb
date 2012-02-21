@@ -4,17 +4,19 @@ require File.expand_path('../spec_helper', __FILE__)
 
 describe Ruote::Amqp::Participant do
 
+  before(:all) do
+    unless @em
+      @em = Thread.new { EM.run {} }
+      sleep 0.5
+    end
+  end
+
   before(:each) do
-    @em = Thread.new { EM.run {} }
-    sleep 1.0
-    AMQP.connect
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
   end
 
   after(:each) do
     @dashboard.shutdown
-    AMQP.stop
-    @em.terminate
   end
 
   it 'publishes messages on the given exchange' do
@@ -28,8 +30,8 @@ describe Ruote::Amqp::Participant do
 
     wi = nil
 
-    AMQP::Channel.new.queue('toto').subscribe do |headers, payload|
-      wi = Rufus::Json.decode(payload)
+    AMQP::Channel.new.queue('toto').subscribe do |h, p|
+      wi = Rufus::Json.decode(p)
     end
 
     pdef = Ruote.define do
@@ -44,25 +46,24 @@ describe Ruote::Amqp::Participant do
     wi['participant_name'].should == 'toto'
   end
 
-  it 'supports custom messages when publishing' do
+  it 'supports the :message option' do
 
     @dashboard.register(
-      :toto,
+      :alpha,
       Ruote::Amqp::Participant,
       :exchange => 'direct/',
-      :routing_key => 'toto',
+      :routing_key => 'alpha',
       :message => 'hello world!',
       :forget => true)
 
     msg = nil
 
-    #AMQP::Channel.new.queue('toto').subscribe do |headers, payload|
-    AMQP::Channel.new.queue('toto').subscribe do |payload|
-      msg = payload
+    AMQP::Channel.new.queue('alpha').subscribe do |h, p|
+      msg = p
     end
 
     pdef = Ruote.define do
-      toto
+      alpha
     end
 
     wfid = @dashboard.launch(pdef)
