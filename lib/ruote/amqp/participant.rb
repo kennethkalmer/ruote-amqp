@@ -33,7 +33,10 @@ module Amqp
   #
   # * options (when the participant is registered)
   #
-  #   dashboard.register 'amqp_participant', :routing_key => 'nada.x'
+  #   dashboard.register(
+  #     'amqp_participant',
+  #     Ruote::Amqp::Participant,
+  #     :routing_key => 'nada.x')
   #
   # * params (from the process definition)
   #
@@ -58,18 +61,60 @@ module Amqp
   # As said above, this option decides who can tweak this participant's
   # options. It accepts a comma-separated list of levels.
   #
-  # The levels are "params", "fields", "options". When the option 'field_prefix'
-  # is set, the level "fields" is set implicitely.
+  # The levels are "params", "fields", "options".
   #
   # The order in which the levels are given is the order in which they
   # are investigated for values.
   #
   # === 'connection'
+  #
+  # A hash of connection options. This is direcly fed to the amqp gem, the
+  # options of that gem apply thus ('host', 'port', 'vhost', 'username' and
+  # 'password').
+  #
   # === 'exchange'
+  #
+  # Accepts a String or an Array whose first element is a String (and the
+  # second a Hash of exchange options).
+  #
+  # The String must be in the form "exchange_type/name", like in "direct/" or
+  # "fanout/nba.scores" or "topic/pub/sub".
+  #
+  # By default, 'exchange' is set to 'direct/' (the default exchange).
+  #
   # === 'field_prefix'
+  #
+  # Sometimes one wants to separate his AMQP participant settings from other
+  # workitem fields.
+  #
+  #   dashboard.register(
+  #     'amqp_participant',
+  #     Ruote::Amqp::Participant,
+  #     :conf => 'fields', :field_prefix => 'amqp_')
+  #
+  # registers a participant that draws is configuration from workitem fields
+  # prefixed with 'amqp_'.
+  #
+  # Note that setting this option doesn't implicitely add 'fields' to the
+  # 'conf' option.
+  #
   # === 'forget'
+  #
+  # When set to true forces the participant to reply to the engine immediately
+  # after the message got published, in a "fire and forget" fashion.
+  #
   # === 'routing_key'
+  #
+  # Depending on the exchange used, this option lets you influence how the
+  # exchange routes the message towards queues.
+  #
+  # Consult your AMQP documentation for more information.
+  #
   # === 'message'
+  #
+  # By default, the workitem is turned into a JSON string and transmitted in
+  # the AMQP message payload. If this 'message' option is set, its value is
+  # used as the payload.
   #
   # === 'persistent'
   #
@@ -114,7 +159,11 @@ module Amqp
 
     def exchange
 
-      con = AMQP.connect(opt('connection') || {})
+      cop = (opt('connection') || {}).inject({}) { |h, (k, v)|
+        h[k.to_sym] = v; h
+      }
+
+      con = AMQP.connect(cop)
       cha = AMQP::Channel.new(con)
 
       exn, exo = Array(opt('exchange')) || [ 'direct/', {} ]
