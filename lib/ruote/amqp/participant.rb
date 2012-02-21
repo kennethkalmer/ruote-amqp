@@ -51,7 +51,7 @@ module Amqp
   # The 'conf' option (only available at participant registration) decides
   # which levels are enabled or not.
   #
-  # By default 'all' levels are enabled.
+  # By default 'conf' is set to 'params, fields, options'.
   #
   # === 'conf'
   #
@@ -60,6 +60,9 @@ module Amqp
   #
   # The levels are "params", "fields", "options". When the option 'field_prefix'
   # is set, the level "fields" is set implicitely.
+  #
+  # The order in which the levels are given is the order in which they
+  # are investigated for values.
   #
   # === 'connection'
   # === 'exchange'
@@ -84,10 +87,8 @@ module Amqp
 
       @options = options
 
-      @conf = (@options['conf'] || 'options, params, fields').split(/\s*,\s*/)
+      @conf = (@options['conf'] || 'params, fields, options').split(/\s*,\s*/)
       @conf = %w[ params fields options ] if @conf.include?('all')
-      @conf = @conf.inject({}) { |h, e| h[e] = true; h }
-      @conf['fields'] = true if @options['field_prefix']
 
       @field_prefix = @options['field_prefix'] || ''
     end
@@ -129,11 +130,17 @@ module Amqp
       AMQP::Exchange.new(cha, m[1].to_sym, m[2], exo || {})
     end
 
-    def opt(key, default=nil, &default_block)
+    def opt(key)
 
-      (@conf['params'] ? workitem.params[key] : nil) ||
-      (@conf['fields'] ? workitem.fields[@field_prefix + key] : nil) ||
-      (@conf['options'] ? @options[key] : nil)
+      @conf.each do |type|
+
+        container = (type == 'options' ? @options : workitem.send(type))
+        k = type == 'fields' ? "#{@field_prefix}#{key}" : key
+
+        return container[k] if container.has_key?(k)
+      end
+
+      nil
     end
   end
 end
