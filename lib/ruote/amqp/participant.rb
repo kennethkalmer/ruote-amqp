@@ -24,20 +24,38 @@
 module Ruote
 module Amqp
 
+  #
+  # == options
+  #
+  # === conf
+  # === connection
+  # === exchange
+  # === field_prefix
+  # === forget
+  # === routing_key
+  # === message
+  #
   class Participant
     include Ruote::LocalParticipant
 
     def initialize(options)
 
       @options = options
+
+      @conf = (@options['conf'] || 'options').split(/\s*,\s*/)
+      @conf = %w[ params fields options ] if @conf.include?('all')
+      @conf = @conf.inject({}) { |h, e| h[e] = true; h }
+      @conf['fields'] = true if @options['field_prefix']
+
+      @field_prefix = @options['field_prefix'] || ''
     end
 
     def on_workitem
 
       exchange.publish(
-        encode_workitem, :routing_key => par_or_opt('routing_key'))
+        encode_workitem, :routing_key => opt('routing_key'))
 
-      reply if par_or_opt('forget')
+      reply if opt('forget')
     end
 
     protected
@@ -49,10 +67,10 @@ module Amqp
 
     def exchange
 
-      con = AMQP.connect(par_or_opt('amqp_connection') || {})
+      con = AMQP.connect(opt('connection') || {})
       cha = AMQP::Channel.new(con)
 
-      exn, exo = Array(par_or_opt('exchange')) || [ 'direct/', {} ]
+      exn, exo = Array(opt('exchange')) || [ 'direct/', {} ]
         #
         # defaults to the "default exchange"...
 
@@ -65,9 +83,11 @@ module Amqp
       AMQP::Exchange.new(cha, m[1].to_sym, m[2], exo || {})
     end
 
-    def par_or_opt(key, default=nil, &default_block)
+    def opt(key, default=nil, &default_block)
 
-      @options['static'] ? nil : workitem.params[key] || @options[key]
+      (@conf['params'] ? workitem.params[key] : nil) ||
+      (@conf['fields'] ? workitem.fields[@field_prefix + key] : nil) ||
+      (@conf['options'] ? @options[key] : nil)
     end
   end
 end
