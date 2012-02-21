@@ -27,13 +27,19 @@ module Amqp
   #
   # == options
   #
-  # === conf
-  # === connection
-  # === exchange
-  # === field_prefix
-  # === forget
-  # === routing_key
-  # === message
+  # === 'conf'
+  # === 'connection'
+  # === 'exchange'
+  # === 'field_prefix'
+  # === 'forget'
+  # === 'routing_key'
+  # === 'message'
+  #
+  # === 'persistent'
+  #
+  # If this option is set to something else than false or nil, messages
+  # messages published by this participant will be persistent (hopefully
+  # the queues they'll end up in will be persistent as well).
   #
   class Participant
     include Ruote::LocalParticipant
@@ -54,7 +60,8 @@ module Amqp
 
       exchange.publish(
         opt('message') || encode_workitem,
-        :routing_key => opt('routing_key'))
+        :routing_key => opt('routing_key'),
+        :persistent => opt('persistent'))
 
       reply if opt('forget')
     end
