@@ -34,25 +34,23 @@ module Amqp
 
     def on_workitem
 
-      connection = AMQP.connect(par_or_opt('amqp_connection') || {})
-      channel = AMQP::Channel.new(connection)
-      exchange = determine_exchange(channel)
-
-      routing_key = par_or_opt('routing_key')
-
-      exchange.publish(serialize_workitem, :routing_key => routing_key)
+      exchange.publish(
+        encode_workitem, :routing_key => par_or_opt('routing_key'))
 
       reply if par_or_opt('forget')
     end
 
     protected
 
-    def serialize_workitem
+    def encode_workitem
 
       workitem.as_json
     end
 
-    def determine_exchange(channel)
+    def exchange
+
+      con = AMQP.connect(par_or_opt('amqp_connection') || {})
+      cha = AMQP::Channel.new(con)
 
       ex = par_or_opt('exchange') || 'direct/'
       m = ex.match(/^([a-z]+)\/(.*)$/)
@@ -61,7 +59,7 @@ module Amqp
         "couldn't determine exchange from #{ex.inspect}"
       ) unless m
 
-      channel.send(m[1], m[2])
+      AMQP::Exchange.new(cha, m[1].to_sym, m[2])
     end
 
     def par_or_opt(key, default=nil, &default_block)
