@@ -122,6 +122,34 @@ module Amqp
   # messages published by this participant will be persistent (hopefully
   # the queues they'll end up in will be persistent as well).
   #
+  #
+  # == #encode_workitem
+  #
+  # The default way to encode a workitem before pushing it to the exchange
+  # is by turning it entirely into a JSON string.
+  #
+  # To alter this, one can subclass this participant and provide its own
+  # #encode_workitem(wi) method:
+  #
+  #   require 'yaml'
+  #
+  #   class MyAmqpParticipant < Ruote::Amqp::Participant
+  #
+  #     def encode_workitem(workitem)
+  #       YAML.dump(workitem)
+  #     end
+  #   end
+  #
+  # or when one needs to filter some fields:
+  #
+  #   class MyAmqpParticipant < Ruote::Amqp::Participant
+  #
+  #     def encode_workitem(workitem)
+  #       workitem.fields.delete_if { |k, v| k.match(/^private_/) }
+  #       super(workitem)
+  #     end
+  #   end
+  #
   class Participant
     include Ruote::LocalParticipant
 
