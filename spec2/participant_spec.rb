@@ -5,10 +5,7 @@ require File.expand_path('../spec_helper', __FILE__)
 describe Ruote::Amqp::Participant do
 
   before(:all) do
-    unless @em
-      @em = Thread.new { EM.run {} }
-      sleep 0.5
-    end
+    start_em
   end
 
   before(:each) do

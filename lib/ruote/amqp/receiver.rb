@@ -23,6 +23,12 @@
 
 module Ruote
 module Amqp
+
+  class Receiver < Ruote::Receiver
+
+    def initialize(engine_or_storage, options)
+    end
+  end
 end
 end
 
