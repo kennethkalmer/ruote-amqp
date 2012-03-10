@@ -74,13 +74,22 @@ module Amqp
   #
   # === 'exchange'
   #
-  # Accepts a String or an Array whose first element is a String (and the
-  # second a Hash of exchange options).
+  # Accepts a two or three sized Array.
   #
-  # The String must be in the form "exchange_type/name", like in "direct/" or
-  # "fanout/nba.scores" or "topic/pub/sub".
+  # The first element is a string or symbol detailing the exchange type,
+  # like :direct, :fanout, :topic, ...
   #
-  # By default, 'exchange' is set to 'direct/' (the default exchange).
+  # The second element is an exchange name.
+  #
+  # The third, optional, element is a hash of exchange options.
+  #
+  # There is more information at http://rubyamqp.info/
+  #
+  # By default, 'exchange' is set to [ 'direct', '' ] (the default exchange).
+  #
+  # Note: you cannot pass an instantiated Ruby-AMQP exchange here. Ruote
+  # cannot serialize it for remote workers, so the settings are passed
+  # in a flat form, easily JSONifiable.
   #
   # === 'field_prefix'
   #
@@ -194,17 +203,15 @@ module Amqp
       con = AMQP.connect(cop)
       cha = AMQP::Channel.new(con)
 
-      exn, exo = Array(opt('exchange')) || [ 'direct/', {} ]
+      type, name, options = opt('exchange') || [ 'direct', '', {} ]
         #
         # defaults to the "default exchange"...
 
-      m = exn.match(/^([a-z]+)\/(.*)$/)
-
       raise ArgumentError.new(
-        "couldn't determine exchange from #{ex.inspect}"
-      ) unless m
+        "couldn't determine exchange from #{opt('exchange').inspect}"
+      ) unless name
 
-      AMQP::Exchange.new(cha, m[1].to_sym, m[2], exo || {})
+      AMQP::Exchange.new(cha, type.to_sym, name, options || {})
     end
 
     def opt(key)

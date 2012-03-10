@@ -22,7 +22,7 @@ describe Ruote::Amqp::Participant do
     @dashboard.register(
       :toto,
       Ruote::Amqp::Participant,
-      :exchange => 'direct/',
+      :exchange => [ 'direct', '' ],
       :routing_key => 'alpha',
       :forget => true)
 
@@ -48,7 +48,7 @@ describe Ruote::Amqp::Participant do
     @dashboard.register(
       :alpha,
       Ruote::Amqp::Participant,
-      :exchange => 'direct/',
+      :exchange => [ 'direct', '' ],
       :routing_key => 'alpha',
       :message => 'hello world!',
       :forget => true)
