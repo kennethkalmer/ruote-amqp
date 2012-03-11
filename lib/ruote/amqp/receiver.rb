@@ -26,7 +26,31 @@ module Amqp
 
   class Receiver < Ruote::Receiver
 
-    def initialize(engine_or_storage, options)
+    attr_reader :queue
+    attr_reader :options
+
+    def initialize(engine_or_storage, queue, options={})
+
+      super(engine_or_storage)
+
+      @queue = queue
+      @options = options
+
+      @queue.subscribe { |headers, payload| handle(headers, payload) }
+    end
+
+    protected
+
+    def handle(headers, payload)
+
+      workitem = decode_workitem(headers, payload)
+
+      receive(workitem)
+    end
+
+    def decode_workitem(headers, payload)
+
+      Rufus::Json.decode(payload)
     end
   end
 end
