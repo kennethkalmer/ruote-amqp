@@ -27,14 +27,12 @@ module Amqp
   class Receiver < Ruote::Receiver
 
     attr_reader :queue
-    attr_reader :options
 
     def initialize(engine_or_storage, queue, options={})
 
-      super(engine_or_storage)
+      super(engine_or_storage, options)
 
       @queue = queue
-      @options = options
 
       @queue.subscribe { |headers, payload| handle(headers, payload) }
     end
