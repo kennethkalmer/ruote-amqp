@@ -43,7 +43,7 @@ describe Ruote::Amqp::Receiver do
     r['action'].should == 'terminated'
   end
 
-  it 'offers a hook for errors' do
+  pending 'offers a hook for errors' do
 
     $errs = []
 
@@ -52,7 +52,6 @@ describe Ruote::Amqp::Receiver do
     end
 
     exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
-
     exchange.publish('nada', :routing_key => 'alpha')
 
     sleep 0.300
