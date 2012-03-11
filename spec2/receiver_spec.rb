@@ -20,6 +20,7 @@ describe Ruote::Amqp::Receiver do
       :routing_key => 'alpha')
 
     @queue = AMQP::Channel.new.queue('alpha')
+    @receiver = Ruote::Amqp::Receiver.new(@dashboard, @queue)
   end
 
   after(:each) do
@@ -29,8 +30,6 @@ describe Ruote::Amqp::Receiver do
   end
 
   it 'grabs workitems from a queue' do
-
-    receiver = Ruote::Amqp::Receiver.new(@dashboard, @queue)
 
     pdef = Ruote.define do
       toto
@@ -42,6 +41,23 @@ describe Ruote::Amqp::Receiver do
     r = @dashboard.wait_for(wfid)
 
     r['action'].should == 'terminated'
+  end
+
+  it 'offers a hook for errors' do
+
+    $errs = []
+
+    def @receiver.handle_error(e)
+      $errs << e
+    end
+
+    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+
+    exchange.publish('nada', :routing_key => 'alpha')
+
+    sleep 0.300
+
+    $errs.size.should == 1
   end
 end
 
