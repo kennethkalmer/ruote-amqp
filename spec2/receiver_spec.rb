@@ -58,5 +58,27 @@ describe Ruote::Amqp::Receiver do
 
     $errs.size.should == 1
   end
+
+  it 'accepts launchitems' do
+
+    @dashboard.register('noop', Ruote::NoOpParticipant)
+
+    #@dashboard.noisy = true
+
+    launchitem = {
+      'definition' => Ruote.define { noop },
+      'fields' => { 'kilroy' => 'was here' }
+    }
+
+    sleep 0.100
+      # give some time for the receiver to get ready...
+
+    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+    exchange.publish(Rufus::Json.encode(launchitem), :routing_key => 'alpha')
+
+    r = @dashboard.wait_for('terminated')
+
+    r['workitem']['fields']['kilroy'].should == 'was here'
+  end
 end
 

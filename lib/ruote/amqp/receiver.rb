@@ -29,7 +29,7 @@ module Ruote::Amqp
   # workitems and feed those workitem back to the engine/storage (in the usual
   # use case, those workitems were initially emitted by the engine).
   #
-  # == #decode_workitem(headers, payload)
+  # == #decode_message(headers, payload)
   #
   # By default, the receiver expects the incoming workitem to be serialized
   # entirely in the payload of the AMQP message. One can change this
@@ -37,10 +37,36 @@ module Ruote::Amqp
   # subclassing)
   #
   #   class MyYamlReceiver < Ruote::Amqp::Receiver
-  #     def decode_workitem(headers, payload)
+  #     def decode_message(headers, payload)
   #       YAML.load(payload)
   #     end
   #   end
+  #
+  # #decode_message is supposed to return a Ruby hash (describing either a
+  # workitem or a launchitem), the difference is explained below.
+  #
+  # === workitems and launchitems
+  #
+  # The standard use case is to accept workitems coming back (they probably
+  # left the engine via Ruote::Amqp::Participant). But it's also OK
+  # to accept "launchitems", hashes with at least one 'process_definition'
+  # (or 'definition') entry.
+  #
+  # Upon receiving a launchitem, the receiver will launch a new process
+  # instances.
+  #
+  # Launchitems may have two more optional entries, 'workitems_fields' (or
+  # 'fields') and 'process_variables' (or 'variables').
+  #
+  # 'workitem_fields' must contain a hash of initial workitem fields (they will
+  # populate the initial workitem.
+  #
+  # 'process_variables' are a very advanced option. It's possible to set the
+  # initial variables in a workflow. Read the general ruote documentation to
+  # learn about the difference between fields and variables.
+  #
+  # The #decode_message is supposed to return hashes, either hashes
+  # representing workitems either hashes representing launchitems.
   #
   # == #handle_error(err)
   #
@@ -72,15 +98,21 @@ module Ruote::Amqp
 
     def handle(header, payload)
 
-      workitem = decode_workitem(header, payload)
+      item = decode_message(header, payload)
 
-      receive(workitem)
+      if (item.has_key?('fields') && item.has_key?('fei'))
+        receive(item)
+      elsif item['process_definition'] || item['definition']
+        launch(item)
+      else
+        raise ArgumentError.new("cannot receive or launch #{item.inspect}")
+      end
 
     rescue => e
       handle_error(e)
     end
 
-    def decode_workitem(header, payload)
+    def decode_message(header, payload)
 
       Rufus::Json.decode(payload)
     end
@@ -90,6 +122,14 @@ module Ruote::Amqp
       $stderr.puts '**err**'
       $stderr.puts err.inspect
       $stderr.puts *err.backtrace
+    end
+
+    def launch(h)
+
+      super(
+        h['process_definition'] || h['definition'],
+        h['workitem_fields'] || h['fields'] || {},
+        h['process_variables'] || h['variables'] || {})
     end
   end
 end
