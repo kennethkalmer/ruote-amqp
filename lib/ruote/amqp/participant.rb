@@ -21,8 +21,7 @@
 #++
 
 
-module Ruote
-module Amqp
+module Ruote::Amqp
 
   #
   # This participant publishes messages on AMQP exchanges.
@@ -189,19 +188,32 @@ module Amqp
 
     protected
 
+    # How a workitem is turned into an AMQP message payload (string).
+    #
+    # Feel free to override this method to accomodate your needs.
+    #
     def encode_workitem
 
       workitem.as_json
     end
 
-    def exchange
+    # Given connection options passed at registration time (when the
+    # participant is registered in ruote) or from the process definition,
+    # returns an AMQP::Channel instance.
+    #
+    def channel
 
-      cop = (opt('connection') || {}).inject({}) { |h, (k, v)|
+      connection_opts = (opt('connection') || {}).inject({}) { |h, (k, v)|
         h[k.to_sym] = v; h
       }
 
-      con = AMQP.connect(cop)
-      cha = AMQP::Channel.new(con)
+      AMQP::Channel.new(AMQP.connect(connection_opts))
+    end
+
+    # Given exchange options passed at registrations time or from the process
+    # definition, returns an AMQP::Exchange instance.
+    #
+    def exchange
 
       type, name, options = opt('exchange') || [ 'direct', '', {} ]
         #
@@ -211,9 +223,13 @@ module Amqp
         "couldn't determine exchange from #{opt('exchange').inspect}"
       ) unless name
 
-      AMQP::Exchange.new(cha, type.to_sym, name, options || {})
+      AMQP::Exchange.new(channel, type.to_sym, name, options || {})
     end
 
+    # The mechanism for looking up options like 'connection', 'exchange',
+    # 'routing_key' in either the participant options, the process
+    # definition or the workitem fields...
+    #
     def opt(key)
 
       @conf.each do |type|
@@ -227,6 +243,5 @@ module Amqp
       nil
     end
   end
-end
 end
 

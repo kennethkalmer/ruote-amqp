@@ -21,8 +21,7 @@
 #++
 
 
-module Ruote
-module Amqp
+module Ruote::Amqp
 
   #
   # A receiver is plugged between a ruote engine/storage and an AMQP queue.
@@ -66,14 +65,14 @@ module Amqp
 
       @queue = queue
 
-      @queue.subscribe { |headers, payload| handle(headers, payload) }
+      @queue.subscribe(&method(:handle))
     end
 
     protected
 
-    def handle(headers, payload)
+    def handle(header, payload)
 
-      workitem = decode_workitem(headers, payload)
+      workitem = decode_workitem(header, payload)
 
       receive(workitem)
 
@@ -81,7 +80,7 @@ module Amqp
       handle_error(e)
     end
 
-    def decode_workitem(headers, payload)
+    def decode_workitem(header, payload)
 
       Rufus::Json.decode(payload)
     end
@@ -93,6 +92,5 @@ module Amqp
       $stderr.puts *err.backtrace
     end
   end
-end
 end
 

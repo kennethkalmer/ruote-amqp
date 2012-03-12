@@ -24,5 +24,6 @@ require 'amqp'
 require 'ruote'
 
 require 'ruote/amqp/participant'
+require 'ruote/amqp/alert_participant'
 require 'ruote/amqp/receiver'
 
