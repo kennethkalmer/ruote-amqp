@@ -42,6 +42,8 @@ Please be sure to have read the requirements section above
 
     gem install ruote-amqp
 
+or via your Gemfile.
+
 
 ## tests
 
