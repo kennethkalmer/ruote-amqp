@@ -186,6 +186,11 @@ module Ruote::Amqp
       reply if opt('forget')
     end
 
+    # No need for a dedicated thread when dispatching messages. Respond
+    # true.
+    #
+    def do_not_thread; true; end
+
     protected
 
     # How a workitem is turned into an AMQP message payload (string).
@@ -203,11 +208,14 @@ module Ruote::Amqp
     #
     def channel
 
-      connection_opts = (opt('connection') || {}).inject({}) { |h, (k, v)|
-        h[k.to_sym] = v; h
-      }
+      Thread.current['_ruote_amqp_channel'] ||= begin
 
-      AMQP::Channel.new(AMQP.connect(connection_opts))
+        connection_opts = (opt('connection') || {}).inject({}) { |h, (k, v)|
+          h[k.to_sym] = v; h
+        }
+
+        AMQP::Channel.new(AMQP.connect(connection_opts))
+      end
     end
 
     # Given exchange options passed at registrations time or from the process
@@ -215,15 +223,18 @@ module Ruote::Amqp
     #
     def exchange
 
-      type, name, options = opt('exchange') || [ 'direct', '', {} ]
-        #
-        # defaults to the "default exchange"...
+      Thread.current['_ruote_amqp_exchange'] ||= begin
 
-      raise ArgumentError.new(
-        "couldn't determine exchange from #{opt('exchange').inspect}"
-      ) unless name
+        type, name, options = opt('exchange') || [ 'direct', '', {} ]
+          #
+          # defaults to the "default exchange"...
 
-      AMQP::Exchange.new(channel, type.to_sym, name, options || {})
+        raise ArgumentError.new(
+          "couldn't determine exchange from #{opt('exchange').inspect}"
+        ) unless name
+
+        AMQP::Exchange.new(channel, type.to_sym, name, options || {})
+      end
     end
 
     # The mechanism for looking up options like 'connection', 'exchange',

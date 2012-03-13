@@ -69,5 +69,40 @@ describe Ruote::Amqp::Participant do
 
     msg.should == 'hello world!'
   end
+
+  it 'flips burgers' do
+
+    @dashboard.register(
+      :alpha,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :message => 'hello world!',
+      :forget => true)
+
+    c0 = count_amqp_objects
+
+    #@dashboard.noisy = true
+
+    wfid = @dashboard.launch(Ruote.define do
+      concurrence do
+        10.times { alpha }
+      end
+    end)
+
+    @dashboard.wait_for(2 + 3 * 10)
+
+    c1 = count_amqp_objects
+
+    3.times { GC.start }
+    sleep 2
+      # doesn't change much...
+
+    c2 = count_amqp_objects
+
+    c2.should == c1
+    c1['AMQP::Channel'].should == (c0['AMQP::Channel'] || 0) + 1
+    c1['AMQP::Exchange'].should == (c0['AMQP::Exchange'] || 0) + 1
+  end
 end
 
