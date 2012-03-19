@@ -13,6 +13,8 @@ describe Ruote::Amqp::Receiver do
 
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
 
+    @dashboard.noisy = ENV['NOISY']
+
     @dashboard.register(
       :toto,
       Ruote::Amqp::Participant,

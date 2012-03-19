@@ -10,6 +10,7 @@ describe Ruote::Amqp::AlertParticipant do
 
   before(:each) do
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
+    @dashboard.noisy = ENV['NOISY']
   end
 
   after(:each) do
@@ -26,8 +27,6 @@ describe Ruote::Amqp::AlertParticipant do
     pdef = Ruote.define do
       snare
     end
-
-    #@dashboard.noisy = true
 
     wfid = @dashboard.launch(pdef)
 

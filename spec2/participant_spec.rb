@@ -10,6 +10,7 @@ describe Ruote::Amqp::Participant do
 
   before(:each) do
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
+    @dashboard.noisy = ENV['NOISY']
   end
 
   after(:each) do
@@ -70,7 +71,7 @@ describe Ruote::Amqp::Participant do
     msg.should == 'hello world!'
   end
 
-  it 'flips burgers' do
+  it 'reuses channels and exchanges within a thread' do
 
     @dashboard.register(
       :alpha,
