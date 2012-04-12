@@ -234,7 +234,11 @@ module Ruote::Amqp
           "couldn't determine exchange from #{opt('exchange').inspect}"
         ) unless name
 
-        AMQP::Exchange.new(channel, type.to_sym, name, options || {})
+        exchange_opts = (options || {}).inject({}) { |h, (k, v)|
+          h[k.to_sym] = v; h
+        }
+
+        AMQP::Exchange.new(channel, type.to_sym, name, exchange_opts)
       end
     end
 
