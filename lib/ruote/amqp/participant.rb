@@ -181,7 +181,8 @@ module Ruote::Amqp
       exchange.publish(
         opt('message') || encode_workitem,
         :routing_key => opt('routing_key'),
-        :persistent => opt('persistent'))
+        :persistent => opt('persistent'),
+        :correlation_id => (opt('correlation_id') || '' ))
 
       reply if opt('forget')
     end

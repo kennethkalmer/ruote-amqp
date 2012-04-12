@@ -71,6 +71,32 @@ describe Ruote::Amqp::Participant do
     msg.should == 'hello world!'
   end
 
+  it 'publishes messages with the given correlation-id' do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :correlation_id => 'beta',
+      :forget => true)
+
+    correlation_id = nil
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| correlation_id = headers.correlation_id }
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for(wfid)
+
+    sleep 0.1
+
+    correlation_id.should == 'beta'
+  end
   it 'reuses channels and exchanges within a thread' do
 
     @dashboard.register(
