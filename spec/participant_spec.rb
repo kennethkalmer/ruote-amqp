@@ -1,192 +1,109 @@
 
-require File.join(File.dirname(__FILE__), 'spec_helper')
+require File.expand_path('../spec_helper', __FILE__)
 
 
-describe RuoteAMQP::ParticipantProxy, :type => :ruote do
+describe Ruote::Amqp::Participant do
 
-  it "supports 'forget' as participant attribute" do
-
-    pdef = ::Ruote.process_definition :name => 'test' do
-      sequence do
-        amqp :queue => 'test1', :forget => true
-        echo 'done.'
-      end
-    end
-
-    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
-
-    run_definition(pdef)
-
-    @tracer.to_s.should == 'done.'
-
-    begin
-      Timeout::timeout(10) do
-        @msg = nil
-        MQ.queue('test1', :durable => true).subscribe { |msg| @msg = msg }
-
-        loop do
-          break unless @msg.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
-    end
-
-    @msg.should match(/^\{.*\}$/) # JSON message by default
+  before(:all) do
+    start_em
   end
 
-  it "supports 'forget' as participant option" do
-
-    pdef = ::Ruote.process_definition :name => 'test' do
-      sequence do
-        amqp :queue => 'test4'
-        echo 'done.'
-      end
-    end
-
-    @engine.register_participant(
-      :amqp, RuoteAMQP::ParticipantProxy, 'forget' => true)
-
-    run_definition(pdef)
-
-    @tracer.to_s.should == "done."
-
-    begin
-      Timeout::timeout(5) do
-        @msg = nil
-        MQ.queue('test4', :durable => true).subscribe { |msg| @msg = msg }
-
-        loop do
-          break unless @msg.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
-    end
-
-    @msg.should match(/^\{.*\}$/) # JSON message by default
+  before(:each) do
+    @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
+    @dashboard.noisy = ENV['NOISY']
   end
 
-  it "supports custom messages instead of workitems" do
-
-    pdef = ::Ruote.process_definition :name => 'test' do
-      sequence do
-        amqp :queue => 'test2', :message => 'foo', :forget => true
-        echo 'done.'
-      end
-    end
-
-    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
-
-    run_definition(pdef)
-
-    @tracer.to_s.should == "done."
-
-    begin
-      Timeout::timeout(5) do
-        @msg = nil
-        MQ.queue('test2', :durable => true).subscribe { |msg| @msg = msg }
-
-        loop do
-          break unless @msg.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
-    end
-
-    @msg.should == 'foo'
+  after(:each) do
+    @dashboard.shutdown
+    @queue.delete rescue nil
   end
 
-  it "supports 'queue' as a participant option" do
+  it 'publishes messages on the given exchange' do
 
-    pdef = ::Ruote.process_definition :name => 'test' do
-      sequence do
-        amqp :forget => true
-        echo 'done.'
-      end
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :forget => true)
+
+    wi = nil
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
+
+    pdef = Ruote.define do
+      toto
     end
 
-    @engine.register_participant(
-      :amqp, RuoteAMQP::ParticipantProxy, 'queue' => 'test5')
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for(wfid)
 
-    run_definition(pdef)
+    sleep 0.1
 
-    @tracer.to_s.should == 'done.'
-
-    begin
-      Timeout::timeout(5) do
-        @msg = nil
-        MQ.queue('test5', :durable => true).subscribe { |msg| @msg = msg }
-
-        loop do
-          break unless @msg.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
-    end
+    wi['participant_name'].should == 'toto'
   end
 
-  it "passes 'participant_options' over amqp" do
+  it 'supports the :message option' do
 
-    pdef = ::Ruote.process_definition :name => 'test' do
-      amqp :queue => 'test6', :forget => true
-    end
-
-    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
-
-    run_definition(pdef)
+    @dashboard.register(
+      :alpha,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :message => 'hello world!',
+      :forget => true)
 
     msg = nil
 
-    begin
-      Timeout::timeout(10) do
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| msg = payload }
 
-        MQ.queue('test6', :durable => true).subscribe { |m| msg = m }
-
-        loop do
-          break unless msg.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
+    pdef = Ruote.define do
+      alpha
     end
 
-    wi = Rufus::Json.decode(msg)
-    params = wi['fields']['params']
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for(wfid)
 
-    params['queue'].should == 'test6'
-    params['forget'].should == true
-    params['participant_options'].should == { 'forget' => false, 'queue' => nil }
+    sleep 0.1
+
+    msg.should == 'hello world!'
   end
 
-  it "doesn't create 1 queue instance per delivery" do
+  it 'reuses channels and exchanges within a thread' do
 
-    pdef = ::Ruote.process_definition do
-      amqp :queue => 'test7', :forget => true
-    end
+    @dashboard.register(
+      :alpha,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :message => 'hello world!',
+      :forget => true)
 
-    mq_count = 0
-    ObjectSpace.each_object(MQ) { |o| mq_count += 1 }
+    c0 = count_amqp_objects
 
-    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
+    #@dashboard.noisy = true
 
-    10.times do
-      run_definition(pdef)
-    end
+    wfid = @dashboard.launch(Ruote.define do
+      concurrence do
+        10.times { alpha }
+      end
+    end)
 
-    sleep 1
+    @dashboard.wait_for(2 + 3 * 10)
 
-    count = 0
-    ObjectSpace.each_object(MQ) { |o| count += 1 }
+    c1 = count_amqp_objects
 
-    count.should == mq_count + 1
+    3.times { GC.start }
+    sleep 2
+      # doesn't change much...
+
+    c2 = count_amqp_objects
+
+    c2.should == c1
+    c1['AMQP::Channel'].should == (c0['AMQP::Channel'] || 0) + 1
+    c1['AMQP::Exchange'].should == (c0['AMQP::Exchange'] || 0) + 1
   end
 end
 

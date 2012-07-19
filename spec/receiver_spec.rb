@@ -1,126 +1,91 @@
 
-require File.join(File.dirname(__FILE__), 'spec_helper')
-
-require 'ruote/participant'
+require File.expand_path('../spec_helper', __FILE__)
 
 
-describe RuoteAMQP::Receiver do
+describe Ruote::Amqp::Receiver do
+
+  before(:all) do
+
+    start_em
+  end
+
+  before(:each) do
+
+    @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
+
+    @dashboard.noisy = ENV['NOISY']
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha')
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @receiver = Ruote::Amqp::Receiver.new(@dashboard, @queue)
+  end
 
   after(:each) do
-    purge_engine
+
+    @dashboard.shutdown
+    @queue.delete
   end
 
-  it "handles replies" do
+  it 'grabs workitems from a queue' do
 
-    pdef = Ruote.process_definition :name => 'test' do
-      set :field => 'foo', :value => 'foo'
-      sequence do
-        echo '${f:foo}'
-        amqp :queue => 'test3'
-        echo '${f:foo}'
-      end
+    pdef = Ruote.define do
+      toto
     end
 
-    @engine.register_participant(:amqp, RuoteAMQP::ParticipantProxy)
+    #@dashboard.noisy = true
 
-    RuoteAMQP::Receiver.new(@engine)
+    wfid = @dashboard.launch(pdef)
+    r = @dashboard.wait_for(wfid)
 
-    wfid = @engine.launch(pdef)
+    r['action'].should == 'terminated'
+  end
 
-    workitem = nil
+  it 'offers a hook for errors' do
 
-    begin
-      Timeout::timeout(5) do
+    $errs = []
 
-        MQ.queue('test3', :durable => true).subscribe { |msg|
-          wi = Ruote::Workitem.new(Rufus::Json.decode(msg))
-          workitem = wi if wi.wfid == wfid
-        }
-
-        loop do
-          break unless workitem.nil?
-          sleep 0.1
-        end
-      end
-    rescue Timeout::Error
-      violated "Timeout waiting for message"
+    def @receiver.handle_error(e)
+      $errs << e
     end
 
-    workitem.fields['foo'] = "bar"
+    sleep 0.100
+      # give some time for the receiver to get ready...
 
-    MQ.queue('ruote_workitems', :durable => true).publish(Rufus::Json.encode(workitem.to_h), :persistent => true)
+    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
 
-    @engine.wait_for(wfid)
+    exchange.publish('nada zero', :routing_key => 'alpha')
+    exchange.publish('nada one', :routing_key => 'alpha')
 
-    @engine.should_not have_errors
-    @engine.should_not have_remaining_expressions
+    sleep 0.300
 
-    @tracer.to_s.should == "foo\nbar"
+    $errs.size.should == 2
   end
 
-  it "launches processes" do
+  it 'accepts launchitems' do
 
-    json = {
-      'definition' => %{
-        Ruote.process_definition :name => 'test' do
-          sequence do
-            echo '${f:foo}'
-          end
-        end
-      },
-      'fields' => { 'foo' => 'bar' }
-    }.to_json
+    @dashboard.register('noop', Ruote::NoOpParticipant)
 
-    RuoteAMQP::Receiver.new(@engine, :launchitems => true, :unsubscribe => true)
+    #@dashboard.noisy = true
 
-    MQ.queue(
-      'ruote_workitems', :durable => true
-    ).publish(
-      json, :persistent => true
-    )
+    launchitem = {
+      'definition' => Ruote.define { noop },
+      'fields' => { 'kilroy' => 'was here' }
+    }
 
-    sleep 0.5
+    sleep 0.100
+      # give some time for the receiver to get ready...
 
-    @engine.should_not have_errors
-    @engine.should_not have_remaining_expressions
+    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+    exchange.publish(Rufus::Json.encode(launchitem), :routing_key => 'alpha')
 
-    @tracer.to_s.should == 'bar'
-  end
+    r = @dashboard.wait_for('terminated')
 
-  it 'accepts a custom :queue' do
-
-    #@engine.noisy = true
-
-    RuoteAMQP::Receiver.new(
-      @engine, :queue => 'mario', :launchitems => true, :unsubscribe => true)
-
-    @engine.register_participant 'alpha', Ruote::StorageParticipant
-
-    json = Rufus::Json.encode({
-      'definition' => "Ruote.define { alpha }"
-    })
-
-    MQ.queue(
-      'ruote_workitems', :durable => true
-    ).publish(
-      json, :persistent => true
-    )
-
-    sleep 1
-
-    @engine.processes.size.should == 0
-      # nothing happened
-
-    MQ.queue(
-      'mario', :durable => true
-    ).publish(
-      json, :persistent => true
-    )
-
-    sleep 1
-
-    @engine.processes.size.should == 1
-      # launch happened
+    r['workitem']['fields']['kilroy'].should == 'was here'
   end
 end
 
