@@ -15,7 +15,7 @@ GIT
 PATH
   remote: .
   specs:
-    ruote-amqp (2.2.0.1)
+    ruote-amqp (2.3.0)
       amqp (~> 0.9)
       ruote (>= 2.2.1)
 
