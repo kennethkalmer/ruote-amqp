@@ -25,7 +25,7 @@ module Ruote::Amqp
 
   #
   # A receiver is plugged between a ruote engine/storage and an AMQP queue.
-  # It will listen on the queue, listen for messages, try to turn them into
+  # It will listen on the queue for messages, try to turn them into
   # workitems and feed those workitem back to the engine/storage (in the usual
   # use case, those workitems were initially emitted by the engine).
   #
@@ -65,8 +65,8 @@ module Ruote::Amqp
   # initial variables in a workflow. Read the general ruote documentation to
   # learn about the difference between fields and variables.
   #
-  # The #decode_message is supposed to return hashes, either hashes
-  # representing workitems either hashes representing launchitems.
+  # The #decode_message is supposed to return a hash representing either a
+  # workitem, either a launchitem.
   #
   # == #handle_error(err)
   #
@@ -100,7 +100,7 @@ module Ruote::Amqp
 
       item = decode_message(header, payload)
 
-      if (item.has_key?('fields') && item.has_key?('fei'))
+      if item['fei'] && item['fei']
         receive(item)
       elsif item['process_definition'] || item['definition']
         launch(item)
