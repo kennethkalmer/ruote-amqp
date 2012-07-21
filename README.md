@@ -19,14 +19,12 @@ http://ruote.rubyforge.org/part_implementations.html
 ## features/problems
 
 * Flexible participant for sending workitems
-* Flexible receiver for receiving replies
-* Flexible launch item listener for launching processes over AMQP
-* Fully evented (thanks to the amqp gem)
+* Flexible receiver for receiving replies and/or process launch requests
 
 
 ## synopsis
 
-Please review the rdoc in RuoteAMQP::Participant and Ruote::AMQP::Listener
+Please review the rdoc in RuoteAMQP::Participant and Ruote::AMQP::Receiver and the specs.
 
 
 ## requirements
@@ -53,11 +51,16 @@ To run the tests you need the following requirements met, or the testing environ
 ### RabbitMQ vhost
 
 The tests use dedicated vhost on a running AMQP broker. To configure RabbitMQ
-you can run the following commands:
+you can run the following commands (the RabbitMQ server must be running):
 
-  # rabbitmqctl add_vhost ruote-test
-  # rabbitmqctl add_user ruote ruote
-  # rabbitmqctl set_permissions -p ruote-test ruote '.*' '.*' '.*'
+    $ rabbitmqctl add_vhost ruote-test
+    $ rabbitmqctl add_user ruote ruote
+    $ rabbitmqctl set_permissions -p ruote-test ruote '.*' '.*' '.*'
+
+or by running:
+
+    $ rake prepare
+
 
 If you need to change the AMQP configuration used by the tests, edit the
 +spec/spec_helper.rb+ file.
