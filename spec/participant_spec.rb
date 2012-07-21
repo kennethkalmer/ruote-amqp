@@ -37,11 +37,67 @@ describe Ruote::Amqp::Participant do
     end
 
     wfid = @dashboard.launch(pdef)
-    @dashboard.wait_for(wfid)
+    r = @dashboard.wait_for(wfid)
+
+    r['action'].should == 'terminated'
+
+    sleep 1.0
+
+    wi['participant_name'].should == 'toto'
+  end
+
+  it 'blocks if :forget is not set to true' do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha')
+
+    wi = nil
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef, 'customer' => 'taira no kiyomori')
+    @dashboard.wait_for('dispatched')
 
     sleep 0.1
 
-    wi['participant_name'].should == 'toto'
+    wi['fields']['customer'].should == 'taira no kiyomori'
+
+    @dashboard.ps(wfid).expressions.size.should == 2
+  end
+
+  it 'supports :forget as a participant attribute' do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha')
+
+    wi = nil
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
+
+    pdef = Ruote.define do
+      toto :forget => true
+    end
+
+    wfid = @dashboard.launch(pdef, 'customer' => 'minamoto no yoshitomo')
+    r = @dashboard.wait_for(wfid)
+
+    r['action'].should == 'terminated'
+
+    sleep 0.1
+
+    wi['fields']['customer'].should == 'minamoto no yoshitomo'
   end
 
   it 'supports the :message option' do
@@ -82,8 +138,6 @@ describe Ruote::Amqp::Participant do
       :forget => true)
 
     c0 = count_amqp_objects
-
-    #@dashboard.noisy = true
 
     wfid = @dashboard.launch(Ruote.define do
       concurrence do

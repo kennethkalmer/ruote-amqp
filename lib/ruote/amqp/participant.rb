@@ -210,8 +210,8 @@ module Ruote::Amqp
 
       Thread.current['_ruote_amqp_channel'] ||= begin
 
-        connection_opts = (opt('connection') || {}).inject({}) { |h, (k, v)|
-          h[k.to_sym] = v; h
+        connection_opts = (opt('connection') || {}).each_with_object({}) { |(k, v), h|
+          h[k.to_sym] = v
         }
 
         AMQP::Channel.new(AMQP.connect(connection_opts))
