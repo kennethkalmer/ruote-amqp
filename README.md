@@ -1,36 +1,58 @@
 
 # ruote-amqp
 
-* http://github.com/kennethkalmer/ruote-amqp
-* http://rdoc.info/projects/kennethkalmer/ruote-amqp
-* http://ruote.rubyforge.org
+ruote-amqp is a set of classes that let a ruote engine publish and/or receive messages over AMQP.
+
+The most common use case is publishing workitems for processing by AMQP consumers and eventually receiving them back to resume the flow.
+
+Another use case would be to listen on an AMQP queue for workflow launch requests.
+
+Listening for arbitrary AMQP messages before resuming a flow (ambush/alert) is also possible.
 
 
-## description
+## usage
 
-ruote-amqp provides an AMQP participant/listener pair that allows you to
-distribute workitems out to AMQP consumers for processing, as well as launching
-processes over AMQP.
+### Ruote::Amqp::Participant
 
-To learn more about remote participants in ruote please see
-http://ruote.rubyforge.org/part_implementations.html
+Publishing messages
 
+```ruby
+  $dashboard.register(
+    :toto,
+    Ruote::Amqp::Participant,
+    :exchange => [ 'direct', '' ],
+    :routing_key => 'alpha')
 
-## features/problems
+  pdef = Ruote.define do
+    toto
+  end
 
-* Flexible participant for sending workitems
-* Flexible receiver for receiving replies and/or process launch requests
+  $dashboard.launch(pdef)
 
+  # ...
+```
 
-## synopsis
+### Ruote::Amqp::Receiver
 
-Please review the rdoc in RuoteAMQP::Participant and Ruote::AMQP::Receiver and the specs.
+Receiving messages.
+
+```ruby
+# TODO
+```
+
+### Ruote::Amqp::AlertParticipant
+
+Ambushing messages from a process definition.
+
+```ruby
+# TODO
+```
 
 
 ## requirements
 
 * ruote[http://ruote.rubyforge.org] 2.3.0 or later
-* amqp[http://github.com/tmm1/amqp] 0.9.0 or later
+* amqp[http://rubyamqp.info/] 0.9.0 or later
 * rabbitmq[http://www.rabbitmq.com/] 2.2.0 or later
 
 
@@ -40,10 +62,10 @@ Please be sure to have read the requirements section above
 
     gem install ruote-amqp
 
-or via your Gemfile.
+or via your Gemfile (thanks [bundler](http://gembundler.com)).
 
 
-## tests
+## tests / specs
 
 To run the tests you need the following requirements met, or the testing environment will fail horribly (or simply get stuck without output).
 
@@ -68,13 +90,9 @@ If you need to change the AMQP configuration used by the tests, edit the
 
 ## daemon-kit
 
-Although the RuoteAMQP gem will work perfectly well with any AMQP consumer,
-it is recommended that you use daemon-kit[http://github.com/kennethkalmer/daemon-kit] to write your remote participants.
+Kenneth Kalmer, the original author of the ruote-amqp gem is also the author of [DaemonKit](https://github.com/kennethkalmer/daemon-kit) a library/toolbox for building daemons.
 
-daemon-kit offers plenty of convenience for remote participants and includes
-a code generator for ruote remote participants.
-
-DaemonKit doesn't currently support ruote 2.1, support is forthcoming.
+It used to be the preferred way to wrap remote participants (as daemons) but lately Kenneth hasn't had much time for support. It's still full of excellent ideas.
 
 
 ## license
