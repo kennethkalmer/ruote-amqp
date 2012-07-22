@@ -115,6 +115,8 @@ describe Ruote::Amqp::Participant do
     @queue = AMQP::Channel.new.queue('alpha')
     @queue.subscribe { |headers, payload| msg = payload }
 
+    sleep 0.1
+
     pdef = Ruote.define do
       alpha
     end

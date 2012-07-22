@@ -30,6 +30,8 @@ describe Ruote::Amqp::AlertParticipant do
 
     wfid = @dashboard.launch(pdef)
 
+    sleep 0.100 # let some time for the alert participant to settle in
+
     exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
     exchange.publish('nada', :routing_key => 'x')
 

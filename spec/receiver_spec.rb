@@ -13,7 +13,7 @@ describe Ruote::Amqp::Receiver do
 
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
 
-    @dashboard.noisy = ENV['NOISY']
+    @dashboard.noisy = ENV['NOISY'].to_s == 'true'
 
     @dashboard.register(
       :toto,
@@ -22,70 +22,150 @@ describe Ruote::Amqp::Receiver do
       :routing_key => 'alpha')
 
     @queue = AMQP::Channel.new.queue('alpha')
+
     @receiver = Ruote::Amqp::Receiver.new(@dashboard, @queue)
+    sleep 0.100 # give some time for the receiver to settle in
   end
 
   after(:each) do
 
     @dashboard.shutdown
+    @receiver.shutdown
+
+    #@queue.status { |mc, acc| p [ :messages, mc, :active_consumers, acc ] }
     @queue.delete
   end
 
-  it 'grabs workitems from a queue' do
+  context 'with workitems' do
 
-    pdef = Ruote.define do
-      toto
+    it 'grabs workitems from a queue' do
+
+      pdef = Ruote.define do
+        toto
+      end
+
+      wfid = @dashboard.launch(pdef)
+      r = @dashboard.wait_for(wfid)
+
+      r['action'].should == 'terminated'
     end
 
-    #@dashboard.noisy = true
+    it 'offers a hook for errors' do
 
-    wfid = @dashboard.launch(pdef)
-    r = @dashboard.wait_for(wfid)
+      $errs = []
 
-    r['action'].should == 'terminated'
+      def @receiver.handle_error(e)
+        $errs << e
+      end
+
+      exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+
+      exchange.publish('nada zero', :routing_key => 'alpha')
+      exchange.publish('nada one', :routing_key => 'alpha')
+
+      sleep 0.300
+
+      $errs.size.should == 2
+    end
   end
 
-  it 'offers a hook for errors' do
+  context 'with launchitems' do
 
-    $errs = []
+    it 'accepts launchitems' do
 
-    def @receiver.handle_error(e)
-      $errs << e
+      @dashboard.register('noop', Ruote::NoOpParticipant)
+
+      launchitem = {
+        'definition' => Ruote.define { noop },
+        'fields' => { 'kilroy' => 'was here' }
+      }
+
+      exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+      exchange.publish(Rufus::Json.encode(launchitem), :routing_key => 'alpha')
+
+      r = @dashboard.wait_for('terminated')
+
+      r['workitem']['fields']['kilroy'].should == 'was here'
+    end
+  end
+
+  context 'when "launchitem-only" (find better name)' do
+
+    it 'discards workitems'
+    it 'discards errors'
+  end
+
+  context 'with errors' do
+
+    class ParticipantWithError
+      include Ruote::LocalParticipant
+
+      def initialize(options)
+
+        @options = options
+      end
+
+      def on_workitem
+
+        wi = workitem.h
+        wi['error'] = @options['error']
+
+        exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+        exchange.publish(Rufus::Json.encode(wi), :routing_key => 'alpha')
+
+        # no replying to the engine
+      end
+
+      def on_cancel
+
+        # nothing
+      end
     end
 
-    sleep 0.100
-      # give some time for the receiver to get ready...
+    it 'propagates errors passed back as strings' do
 
-    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
+      @dashboard.register_participant(
+        'alf', ParticipantWithError, 'error' => 'something went wrong')
 
-    exchange.publish('nada zero', :routing_key => 'alpha')
-    exchange.publish('nada one', :routing_key => 'alpha')
+      wfid = @dashboard.launch(Ruote.define { alf })
+      r = @dashboard.wait_for(wfid)
 
-    sleep 0.300
+      r['action'].should == 'error_intercepted'
 
-    $errs.size.should == 2
-  end
+      r['error']['class'].should == 'Ruote::Amqp::RemoteError'
+      r['error']['message'].should == 'something went wrong'
+    end
 
-  it 'accepts launchitems' do
+    it 'propagates errors passed back as hashes' do
 
-    @dashboard.register('noop', Ruote::NoOpParticipant)
+      @dashboard.register_participant(
+        'alf',
+        ParticipantWithError,
+        'error' => {
+          'class' => 'ArgumentError', 'message' => 'something missing' })
 
-    #@dashboard.noisy = true
+      wfid = @dashboard.launch(Ruote.define { alf })
+      r = @dashboard.wait_for(wfid)
 
-    launchitem = {
-      'definition' => Ruote.define { noop },
-      'fields' => { 'kilroy' => 'was here' }
-    }
+      r['action'].should == 'error_intercepted'
 
-    sleep 0.100
-      # give some time for the receiver to get ready...
+      r['error']['class'].should == 'ArgumentError'
+      r['error']['message'].should == 'something missing'
+    end
 
-    exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
-    exchange.publish(Rufus::Json.encode(launchitem), :routing_key => 'alpha')
+    it 'propagates errors passed back as whatever' do
 
-    r = @dashboard.wait_for('terminated')
+      @dashboard.register_participant(
+        'alf', ParticipantWithError, 'error' => %w[ not good ])
 
-    r['workitem']['fields']['kilroy'].should == 'was here'
+      wfid = @dashboard.launch(Ruote.define { alf })
+      r = @dashboard.wait_for(wfid)
+
+      r['action'].should == 'error_intercepted'
+
+      r['error']['class'].should == 'Ruote::Amqp::RemoteError'
+      r['error']['message'].should == %w[ not good ].inspect
+    end
   end
 end
 

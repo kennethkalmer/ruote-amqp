@@ -94,13 +94,20 @@ module Ruote::Amqp
       @queue.subscribe(&method(:handle))
     end
 
+    def shutdown
+
+      @queue.unsubscribe
+    end
+
     protected
 
     def handle(header, payload)
 
       item = decode_message(header, payload)
 
-      if item['fei'] && item['fei']
+      if item['error'] && item['fei']
+        flunk(item)
+      elsif item['fields'] && item['fei']
         receive(item)
       elsif item['process_definition'] || item['definition']
         launch(item)
@@ -131,6 +138,25 @@ module Ruote::Amqp
         h['workitem_fields'] || h['fields'] || {},
         h['process_variables'] || h['variables'] || {})
     end
+
+    def flunk(h)
+
+      err = h.delete('error')
+
+      args = case err
+        when String then [ RemoteError, err ]
+        when Hash then [ Ruote.constantize(err['class']), err['message'] ]
+        else [ RemoteError, err.inspect ]
+      end
+
+      super(h, *args)
+    end
+  end
+
+  #
+  # TODO
+  #
+  class RemoteError < StandardError
   end
 end
 
