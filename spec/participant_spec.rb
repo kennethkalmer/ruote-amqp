@@ -5,15 +5,19 @@ require 'spec_helper'
 describe Ruote::Amqp::Participant do
 
   before(:all) do
-    start_em
+
+    ensure_em_is_running
   end
 
   before(:each) do
+
     @dashboard = Ruote::Dashboard.new(Ruote::Worker.new(Ruote::HashStorage.new))
-    @dashboard.noisy = ENV['NOISY']
+
+    @dashboard.noisy = ENV['NOISY'].to_s == 'true'
   end
 
   after(:each) do
+
     @dashboard.shutdown
     @queue.delete rescue nil
   end

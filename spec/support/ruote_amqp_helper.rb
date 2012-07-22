@@ -1,7 +1,7 @@
 
 module RuoteAmqpHelper
 
-  def start_em
+  def ensure_em_is_running
 
     unless @em
       @em = Thread.new { EM.run {} }

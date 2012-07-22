@@ -6,7 +6,7 @@ describe Ruote::Amqp::Receiver do
 
   before(:all) do
 
-    start_em
+    ensure_em_is_running
   end
 
   before(:each) do
