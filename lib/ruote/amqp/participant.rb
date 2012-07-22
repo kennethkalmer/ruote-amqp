@@ -178,18 +178,58 @@ module Ruote::Amqp
     #
     def on_workitem
 
-      exchange.publish(
-        opt('message') || encode_workitem,
-        :routing_key => opt('routing_key'),
-        :persistent => opt('persistent'))
+      instantiate_exchange.publish(
+        message, :routing_key => routing_key, :persistent => persistent)
 
-      reply if opt('forget')
+      reply if forget
     end
 
     # No need for a dedicated thread when dispatching messages. Respond
     # true.
     #
     def do_not_thread; true; end
+
+    # Returns the exchange coordinates (a triple [ type, name, options ]).
+    # Defaults to the direct exchange.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def exchange
+
+      opt('exchange') || [ 'direct', '', {} ]
+        #
+        # defaults to the "default exchange"...
+    end
+
+    # Returns the message to publish.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def message; opt('message') || encode_workitem; end
+
+    # Returns the routing key for the message to publish.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def routing_key; opt('routing_key'); end
+
+    # Returns whether the publish should be persistent or not.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def persistent; opt('persistent'); end
+
+    # Returns something true-ish if the participant should not reply to the
+    # engine once the publish operation is done.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def forget; opt('forget'); end
 
     protected
 
@@ -221,16 +261,15 @@ module Ruote::Amqp
     # Given exchange options passed at registrations time or from the process
     # definition, returns an AMQP::Exchange instance.
     #
-    def exchange
+    def instantiate_exchange
 
       Thread.current['_ruote_amqp_exchange'] ||= begin
 
-        type, name, options = opt('exchange') || [ 'direct', '', {} ]
-          #
-          # defaults to the "default exchange"...
+        exc = exchange
+        type, name, options = exc
 
         raise ArgumentError.new(
-          "couldn't determine exchange from #{opt('exchange').inspect}"
+          "couldn't determine exchange from #{exc.inspect}"
         ) unless name
 
         AMQP::Exchange.new(channel, type.to_sym, name, options || {})

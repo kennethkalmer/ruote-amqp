@@ -8,5 +8,6 @@
 
 *** 2.3.0
 
-[ ] https://gist.github.com/1944228
+[x] https://gist.github.com/1944228
+[ ] ON_CANCEL !
 

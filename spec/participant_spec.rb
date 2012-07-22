@@ -36,6 +36,8 @@ describe Ruote::Amqp::Participant do
     @queue = AMQP::Channel.new.queue('alpha')
     @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
 
+    sleep 0.1
+
     pdef = Ruote.define do
       toto
     end
@@ -45,7 +47,7 @@ describe Ruote::Amqp::Participant do
 
     r['action'].should == 'terminated'
 
-    sleep 1.0
+    sleep 0.1
 
     wi['participant_name'].should == 'toto'
   end
@@ -62,6 +64,8 @@ describe Ruote::Amqp::Participant do
 
     @queue = AMQP::Channel.new.queue('alpha')
     @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
+
+    sleep 0.1
 
     pdef = Ruote.define do
       toto
