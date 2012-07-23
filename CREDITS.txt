@@ -12,6 +12,7 @@
 
 == CONTRIBUTORS
 
+* Jiří Kubíček - https://github.com/kubicek
 * Mario Camou
 * Sean Johnson - https://github.com/belucid
 * Victor Liu - https://github.com/pennymax

@@ -179,7 +179,10 @@ module Ruote::Amqp
     def on_workitem
 
       instantiate_exchange.publish(
-        message, :routing_key => routing_key, :persistent => persistent)
+        message,
+        :routing_key => routing_key,
+        :persistent => persistent,
+        :correlation_id => correlation_id)
 
       reply if forget
     end
@@ -222,6 +225,17 @@ module Ruote::Amqp
     # depend on the @workitem or other factors).
     #
     def persistent; opt('persistent'); end
+
+    # Returns the correlation_id for the message publication. Returns ''
+    # by default.
+    #
+    # Available as a method so it can be overriden (the return value could
+    # depend on the @workitem or other factors).
+    #
+    def correlation_id
+
+      opt('correlation_id') || ''
+    end
 
     # Returns something true-ish if the participant should not reply to the
     # engine once the publish operation is done.
@@ -272,7 +286,11 @@ module Ruote::Amqp
           "couldn't determine exchange from #{exc.inspect}"
         ) unless name
 
-        AMQP::Exchange.new(channel, type.to_sym, name, options || {})
+        exchange_opts = (options || {}).inject({}) { |h, (k, v)|
+          h[k.to_sym] = v; h
+        }
+
+        AMQP::Exchange.new(channel, type.to_sym, name, exchange_opts)
       end
     end
 
