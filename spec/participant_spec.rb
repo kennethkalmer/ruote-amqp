@@ -230,7 +230,9 @@ describe Ruote::Amqp::Participant do
     items = msgs.collect { |msg| Rufus::Json.decode(msg.last) }
 
     items.first['participant_name'].should == 'toto'
-    items.last.keys.sort.should == %w[ fei flavour ]
+
+    items.last.keys.sort.should == %w[ cancel fei flavour ]
+    items.last['cancel'].should == true
     items.last['fei']['wfid'].should == wfid
     items.last['flavour'].should == nil
   end

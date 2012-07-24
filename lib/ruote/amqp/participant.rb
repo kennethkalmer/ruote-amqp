@@ -273,7 +273,8 @@ module Ruote::Amqp
     #
     def encode_cancelitem
 
-      Rufus::Json.encode('fei' => @fei.h, 'flavour' => @flavour)
+      Rufus::Json.encode(
+        'cancel' => true, 'fei' => @fei.h, 'flavour' => @flavour)
     end
 
     # Given connection options passed at registration time (when the
