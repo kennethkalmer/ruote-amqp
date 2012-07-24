@@ -152,6 +152,8 @@ describe Ruote::Amqp::Participant do
     @queue = AMQP::Channel.new.queue('alpha')
     @queue.subscribe { |headers, payload| correlation_id = headers.correlation_id }
 
+    sleep 0.1
+
     pdef = Ruote.define do
       toto
     end
@@ -231,6 +233,36 @@ describe Ruote::Amqp::Participant do
     items.last.keys.sort.should == %w[ fei flavour ]
     items.last['fei']['wfid'].should == wfid
     items.last['flavour'].should == nil
+  end
+
+  it "doesn't publish \"cancelitems\" if 'discard_cancel' => true" do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :discard_cancel => true)
+
+    msgs = []
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for('dispatched')
+
+    sleep 0.1
+
+    @dashboard.cancel(wfid)
+
+    sleep 0.1
+
+    msgs.size.should == 1
   end
 end
 

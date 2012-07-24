@@ -189,7 +189,7 @@ module Ruote::Amqp
 
     def on_cancel
 
-      #return if opt('no_cancel_propagation')
+      return if opt('discard_cancel')
 
       instantiate_exchange.publish(
         encode_cancelitem,
