@@ -196,5 +196,41 @@ describe Ruote::Amqp::Participant do
     c1['AMQP::Channel'].should == (c0['AMQP::Channel'] || 0) + 1
     c1['AMQP::Exchange'].should == (c0['AMQP::Exchange'] || 0) + 1
   end
+
+  it 'publishes "cancelitems"' do
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha')
+
+    msgs = []
+
+    @queue = AMQP::Channel.new.queue('alpha')
+    @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef)
+    @dashboard.wait_for('dispatched')
+
+    sleep 0.1
+
+    @dashboard.cancel(wfid)
+
+    sleep 0.1
+
+    msgs.size.should == 2
+
+    items = msgs.collect { |msg| Rufus::Json.decode(msg.last) }
+
+    items.first['participant_name'].should == 'toto'
+    items.last.keys.sort.should == %w[ fei flavour ]
+    items.last['fei']['wfid'].should == wfid
+    items.last['flavour'].should == nil
+  end
 end
 

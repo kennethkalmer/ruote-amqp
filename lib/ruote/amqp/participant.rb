@@ -187,6 +187,17 @@ module Ruote::Amqp
       reply if forget
     end
 
+    def on_cancel
+
+      #return if opt('no_cancel_propagation')
+
+      instantiate_exchange.publish(
+        encode_cancelitem,
+        :routing_key => routing_key,
+        :persistent => persistent,
+        :correlation_id => correlation_id)
+    end
+
     # No need for a dedicated thread when dispatching messages. Respond
     # true.
     #
@@ -254,6 +265,15 @@ module Ruote::Amqp
     def encode_workitem
 
       workitem.as_json
+    end
+
+    # How a "cancelitem" is turned into an AMQP message payload (string).
+    #
+    # Feel free to override this method to accomodate your needs.
+    #
+    def encode_cancelitem
+
+      Rufus::Json.encode('fei' => @fei.h, 'flavour' => @flavour)
     end
 
     # Given connection options passed at registration time (when the
