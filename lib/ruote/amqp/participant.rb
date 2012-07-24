@@ -284,11 +284,11 @@ module Ruote::Amqp
 
       Thread.current['_ruote_amqp_channel'] ||= begin
 
-        connection_opts = (opt('connection') || {}).each_with_object({}) { |(k, v), h|
+        conn_opts = (opt('connection') || {}).each_with_object({}) { |(k, v), h|
           h[k.to_sym] = v
         }
 
-        AMQP::Channel.new(AMQP.connect(connection_opts))
+        AMQP::Channel.new(AMQP.connect(conn_opts))
       end
     end
 
@@ -306,8 +306,8 @@ module Ruote::Amqp
           "couldn't determine exchange from #{exc.inspect}"
         ) unless name
 
-        exchange_opts = (options || {}).inject({}) { |h, (k, v)|
-          h[k.to_sym] = v; h
+        exchange_opts = (options || {}).each_with_object({}) { |(k, v), h|
+          h[k.to_sym] = v
         }
 
         AMQP::Exchange.new(channel, type.to_sym, name, exchange_opts)
