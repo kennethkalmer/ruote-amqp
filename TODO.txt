@@ -11,3 +11,6 @@
 [x] https://gist.github.com/1944228
 [ ] ON_CANCEL !
 
+[ ] incorporate
+    https://github.com/marsbomber/ruote-amqp/commit/0f36a41f4a0254847a7b9a7c4b2098c8164f21f3
+
