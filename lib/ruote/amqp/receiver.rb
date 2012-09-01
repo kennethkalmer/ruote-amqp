@@ -136,9 +136,7 @@ module Ruote::Amqp
 
     def handle_error(err)
 
-      # TODO: mention this.class
-
-      $stderr.puts "**err**"
+      $stderr.puts '**err**'
       $stderr.puts err.inspect
       $stderr.puts err.backtrace
     end
@@ -175,9 +173,9 @@ module Ruote::Amqp
   end
 
   #
-  # TODO
+  # Used to wrap errors that come as string (well, errors that don't come
+  # with a class name). Could be thought of as "anonymous remote error".
   #
-  class RemoteError < StandardError
-  end
+  class RemoteError < StandardError; end
 end
 
