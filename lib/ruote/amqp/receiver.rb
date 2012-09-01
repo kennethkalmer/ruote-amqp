@@ -81,16 +81,26 @@ module Ruote::Amqp
   #     end
   #   end
   #
+  #
+  # == initialization options
+  #
+  # One can set the "launch_only" option to true when initializing the receiver
+  # to prevent it from handling anything but launchitems.
+  #
+  #   receiver = Ruote::Amqp::Receiver.new(
+  #     @dashboard, @amqp_queue, :launch_only => true)
+  #
+  # 'launch_only' (string) is valid too.
+  #
   class Receiver < Ruote::Receiver
 
     attr_reader :queue
 
     def initialize(engine_or_storage, queue, options={})
 
-      super(engine_or_storage, options)
+      super(engine_or_storage, Ruote.keys_to_s(options))
 
       @queue = queue
-
       @queue.subscribe(&method(:handle))
     end
 
@@ -126,20 +136,16 @@ module Ruote::Amqp
 
     def handle_error(err)
 
-      $stderr.puts '**err**'
+      # TODO: mention this.class
+
+      $stderr.puts "**err**"
       $stderr.puts err.inspect
-      $stderr.puts *err.backtrace
-    end
-
-    def launch(h)
-
-      super(
-        h['process_definition'] || h['definition'],
-        h['workitem_fields'] || h['fields'] || {},
-        h['process_variables'] || h['variables'] || {})
+      $stderr.puts err.backtrace
     end
 
     def flunk(h)
+
+      return if @options['launch_only']
 
       err = h.delete('error')
 
@@ -150,6 +156,21 @@ module Ruote::Amqp
       end
 
       super(h, *args)
+    end
+
+    def receive(h)
+
+      return if @options['launch_only']
+
+      super(h)
+    end
+
+    def launch(h)
+
+      super(
+        h['process_definition'] || h['definition'],
+        h['workitem_fields'] || h['fields'] || {},
+        h['process_variables'] || h['variables'] || {})
     end
   end
 
