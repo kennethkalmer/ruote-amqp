@@ -6,7 +6,7 @@ require 'rubygems/user_interaction' if Gem::RubyGemsVersion == '1.5.0'
 
 require 'rake'
 require 'rake/clean'
-require 'rake/rdoctask'
+#require 'rake/rdoctask'
 
 
 #
@@ -68,34 +68,36 @@ task :prepare do
 end
 
 
+##
+## rdoc
+##
+## make sure to have rdoc 2.5.x to run that
 #
-# rdoc
+#Rake::RDocTask.new do |rd|
 #
-# make sure to have rdoc 2.5.x to run that
-
-Rake::RDocTask.new do |rd|
-
-  rd.main = 'README.rdoc'
-  rd.rdoc_dir = 'rdoc'
-
-  rd.rdoc_files.include(
-    'README.rdoc', 'CHANGELOG.txt', 'CREDITS.txt', 'lib/**/*.rb')
-
-  rd.title = "#{GEMSPEC.name} #{GEMSPEC.version}"
-end
-
-
+#  rd.main = 'README.rdoc'
+#  rd.rdoc_dir = 'rdoc'
 #
-# upload_rdoc
-
-desc %{
-  upload the rdoc to rubyforge
-}
-task :upload_rdoc => [ :clean, :rdoc ] do
-
-  account = 'jmettraux@rubyforge.org'
-  webdir = '/var/www/gforge-projects/ruote'
-
-  sh "rsync -azv -e ssh rdoc/#{GEMSPEC.name}_rdoc #{account}:#{webdir}/"
-end
+#  rd.rdoc_files.include(
+#    'README.rdoc', 'CHANGELOG.txt', 'CREDITS.txt', 'lib/**/*.rb')
+#
+#  rd.title = "#{GEMSPEC.name} #{GEMSPEC.version}"
+#end
+#
+#
+##
+## upload_rdoc
+#
+#desc %{
+#  upload the rdoc to rubyforge
+#}
+#task :upload_rdoc => [ :clean, :rdoc ] do
+#
+#  account = 'jmettraux@rubyforge.org'
+#  webdir = '/var/www/gforge-projects/ruote'
+#
+#  sh "rsync -azv -e ssh rdoc/#{GEMSPEC.name}_rdoc #{account}:#{webdir}/"
+#end
+  #
+  # leverarge rdoc.info instead
 
