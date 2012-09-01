@@ -4,7 +4,7 @@
 
 == ruote-amqp - 2.3.0    not yet released
 
-- blah blah blah
+- complete rework to better adhere to the AMQP philosophy
 
 
 == ruote-amqp - 2.2.0    released 2011/03/01
