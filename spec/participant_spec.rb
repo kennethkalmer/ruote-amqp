@@ -199,100 +199,106 @@ describe Ruote::Amqp::Participant do
     c1['AMQP::Exchange'].should == (c0['AMQP::Exchange'] || 0) + 1
   end
 
-  it 'publishes "cancelitems"' do
+  context 'cancelitems' do
 
-    @dashboard.register(
-      :toto,
-      Ruote::Amqp::Participant,
-      :exchange => [ 'direct', '' ],
-      :routing_key => 'alpha')
+    it 'publishes "cancelitems"' do
 
-    msgs = []
+      @dashboard.register(
+        :toto,
+        Ruote::Amqp::Participant,
+        :exchange => [ 'direct', '' ],
+        :routing_key => 'alpha')
 
-    @queue = AMQP::Channel.new.queue('alpha')
-    @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
+      msgs = []
 
-    pdef = Ruote.define do
-      toto
+      @queue = AMQP::Channel.new.queue('alpha')
+      @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
+
+      pdef = Ruote.define do
+        toto
+      end
+
+      wfid = @dashboard.launch(pdef)
+      @dashboard.wait_for('dispatched')
+
+      sleep 0.1
+
+      @dashboard.cancel(wfid)
+
+      sleep 0.1
+
+      msgs.size.should == 2
+
+      items = msgs.collect { |msg| Rufus::Json.decode(msg.last) }
+
+      items.first['participant_name'].should == 'toto'
+
+      items.last.keys.sort.should == %w[ cancel fei flavour ]
+      items.last['cancel'].should == true
+      items.last['fei']['wfid'].should == wfid
+      items.last['flavour'].should == nil
     end
 
-    wfid = @dashboard.launch(pdef)
-    @dashboard.wait_for('dispatched')
+    it "doesn't publish \"cancelitems\" if 'discard_cancel' => true" do
 
-    sleep 0.1
+      @dashboard.register(
+        :toto,
+        Ruote::Amqp::Participant,
+        :exchange => [ 'direct', '' ],
+        :routing_key => 'alpha',
+        :discard_cancel => true)
 
-    @dashboard.cancel(wfid)
+      msgs = []
 
-    sleep 0.1
+      @queue = AMQP::Channel.new.queue('alpha')
+      @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
 
-    msgs.size.should == 2
+      pdef = Ruote.define do
+        toto
+      end
 
-    items = msgs.collect { |msg| Rufus::Json.decode(msg.last) }
+      wfid = @dashboard.launch(pdef)
+      @dashboard.wait_for('dispatched')
 
-    items.first['participant_name'].should == 'toto'
+      sleep 0.1
 
-    items.last.keys.sort.should == %w[ cancel fei flavour ]
-    items.last['cancel'].should == true
-    items.last['fei']['wfid'].should == wfid
-    items.last['flavour'].should == nil
+      @dashboard.cancel(wfid)
+
+      sleep 0.1
+
+      msgs.size.should == 1
+    end
   end
 
-  it "doesn't publish \"cancelitems\" if 'discard_cancel' => true" do
+  context 'Ruote::Amqp.session' do
 
-    @dashboard.register(
-      :toto,
-      Ruote::Amqp::Participant,
-      :exchange => [ 'direct', '' ],
-      :routing_key => 'alpha',
-      :discard_cancel => true)
+    it 'uses Ruote::Amqp.session if set for connecting to AMQP' do
 
-    msgs = []
+      Ruote::Amqp.session = 'fail!'
 
-    @queue = AMQP::Channel.new.queue('alpha')
-    @queue.subscribe { |headers, payload| msgs << [ headers, payload ] }
+      @dashboard.register(
+        :toto,
+        Ruote::Amqp::Participant,
+        :exchange => [ 'direct', '' ],
+        :routing_key => 'alpha',
+        :forget => true)
 
-    pdef = Ruote.define do
-      toto
+      pdef = Ruote.define do
+        toto
+      end
+
+      wfid = @dashboard.launch(pdef)
+      r = @dashboard.wait_for(wfid)
+
+      r['action'].should == 'error_intercepted'
+
+      r['error']['class'].should ==
+        'NoMethodError'
+      r['error']['message'].should ==
+        "undefined method `auto_recovering?' for \"fail!\":String"
+
+      Ruote::Amqp.session = nil
     end
-
-    wfid = @dashboard.launch(pdef)
-    @dashboard.wait_for('dispatched')
-
-    sleep 0.1
-
-    @dashboard.cancel(wfid)
-
-    sleep 0.1
-
-    msgs.size.should == 1
-  end
-
-  it 'uses Ruote::Amqp.session if set for connecting to AMQP' do
-
-    Ruote::Amqp.session = 'fail!'
-
-    @dashboard.register(
-      :toto,
-      Ruote::Amqp::Participant,
-      :exchange => [ 'direct', '' ],
-      :routing_key => 'alpha',
-      :forget => true)
-
-    pdef = Ruote.define do
-      toto
-    end
-
-    wfid = @dashboard.launch(pdef)
-    r = @dashboard.wait_for(wfid)
-
-    r['action'].should == 'error_intercepted'
-
-    r['error']['class'].should ==
-      'NoMethodError'
-    r['error']['message'].should ==
-      "undefined method `auto_recovering?' for \"fail!\":String"
-
-    Ruote::Amqp.session = nil
   end
 end
 
