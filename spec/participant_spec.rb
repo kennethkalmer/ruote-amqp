@@ -272,6 +272,11 @@ describe Ruote::Amqp::Participant do
 
   context 'Ruote::Amqp.session' do
 
+    after(:each) do
+
+      Ruote::Amqp.session = nil
+    end
+
     it 'uses Ruote::Amqp.session if set for connecting to AMQP' do
 
       Ruote::Amqp.session = 'fail!'
@@ -296,8 +301,37 @@ describe Ruote::Amqp::Participant do
         'NoMethodError'
       r['error']['message'].should ==
         "undefined method `auto_recovering?' for \"fail!\":String"
+    end
 
-      Ruote::Amqp.session = nil
+    it "doesn't use Ruote::Amqp.session if a 'connection' option is given" do
+
+      Ruote::Amqp.session = 'do fail now!'
+
+      @dashboard.register(
+        :toto,
+        Ruote::Amqp::Participant,
+        :exchange => [ 'direct', '' ],
+        :routing_key => 'alpha',
+        :forget => true,
+        :connection => {})
+
+      wi = nil
+
+      @queue = AMQP::Channel.new.queue('alpha')
+      @queue.subscribe { |headers, payload| wi = Rufus::Json.decode(payload) }
+
+      sleep 0.1
+
+      pdef = Ruote.define do
+        toto
+      end
+
+      wfid = @dashboard.launch(pdef)
+      r = @dashboard.wait_for(wfid)
+      sleep 0.1
+
+      r['action'].should == 'terminated'
+      wi['participant_name'].should == 'toto'
     end
   end
 end

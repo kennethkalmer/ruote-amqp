@@ -71,6 +71,11 @@ module Ruote::Amqp
   # options of that gem apply thus ('host', 'port', 'vhost', 'username' and
   # 'password').
   #
+  # If no 'connection' (or :connection) hash is passed, the participant
+  # will attempt to use the connection (AMQP::Session) found in
+  # Ruote::Amqp.session. If there is nothing in there, it will [attempt] to
+  # create a new connection with AMQP's default settings.
+  #
   # === 'exchange'
   #
   # Accepts a two or three sized Array.
@@ -284,8 +289,13 @@ module Ruote::Amqp
     #
     def amqp_connect
 
-      Ruote::Amqp.session ||
-      AMQP.connect(Ruote.keys_to_sym(opt('connection') || {}))
+      ocon = opt('connection')
+
+      if Ruote::Amqp.session && ( ! ocon)
+        Ruote::Amqp.session
+      else
+        AMQP.connect(Ruote.keys_to_sym(ocon || {}))
+      end
     end
 
     # Given connection options passed at registration time (when the
