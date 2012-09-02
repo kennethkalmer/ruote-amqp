@@ -260,7 +260,7 @@ module Ruote::Amqp
 
     # How a workitem is turned into an AMQP message payload (string).
     #
-    # Feel free to override this method to accomodate your needs.
+    # Feel free to override this method to accommodate your needs.
     #
     def encode_workitem
 
@@ -269,12 +269,22 @@ module Ruote::Amqp
 
     # How a "cancelitem" is turned into an AMQP message payload (string).
     #
-    # Feel free to override this method to accomodate your needs.
+    # Feel free to override this method to accommodate your needs.
     #
     def encode_cancelitem
 
       Rufus::Json.encode(
         'cancel' => true, 'fei' => @fei.h, 'flavour' => @flavour)
+    end
+
+    # Default AMQP.connect method.
+    #
+    # Feel free to override this method to accommodate your needs (See
+    # the README for an example).
+    #
+    def amqp_connect
+
+      AMQP.connect(Ruote.keys_to_sym(opt('connection') || {}))
     end
 
     # Given connection options passed at registration time (when the
@@ -283,14 +293,7 @@ module Ruote::Amqp
     #
     def channel
 
-      Thread.current['_ruote_amqp_channel'] ||= begin
-
-        conn_opts = (opt('connection') || {}).each_with_object({}) { |(k, v), h|
-          h[k.to_sym] = v
-        }
-
-        AMQP::Channel.new(AMQP.connect(conn_opts))
-      end
+      Thread.current['_ruote_amqp_channel'] ||= AMQP::Channel.new(amqp_connect)
     end
 
     # Given exchange options passed at registrations time or from the process
