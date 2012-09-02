@@ -284,6 +284,7 @@ module Ruote::Amqp
     #
     def amqp_connect
 
+      Ruote::Amqp.session ||
       AMQP.connect(Ruote.keys_to_sym(opt('connection') || {}))
     end
 

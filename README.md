@@ -17,19 +17,19 @@ Listening for arbitrary AMQP messages before resuming a flow (ambush/alert) is a
 Publishing messages
 
 ```ruby
-  $dashboard.register(
-    :toto,
-    Ruote::Amqp::Participant,
-    :exchange => [ 'direct', '' ],
-    :routing_key => 'alpha')
+$dashboard.register(
+  :toto,
+  Ruote::Amqp::Participant,
+  :exchange => [ 'direct', '' ],
+  :routing_key => 'alpha')
 
-  pdef = Ruote.define do
-    toto
-  end
+pdef = Ruote.define do
+  toto
+end
 
-  $dashboard.launch(pdef)
+$dashboard.launch(pdef)
 
-  # ...
+# ...
 ```
 
 ### Ruote::Amqp::Receiver
@@ -47,6 +47,31 @@ Ambushing messages from a process definition.
 ```ruby
 # TODO
 ```
+
+### Controlling the connection (AMQP session)
+
+The Ruote::Amqp module has a handy singleton for connections (actually
+AMQP::Session instances).
+
+```ruby
+# (before registering participants)
+
+Ruote::Amqp.session = AMQP.connect(:auto_recovery => true) do |con|
+  con.on_recovery do |con|
+    puts "Recovered..."
+  end
+  connection.on_tcp_connection_loss do |con, settings|
+    puts "Reconnecting... please wait"
+    conn.reconnect(false, 20)
+  end
+end
+```
+
+When a participant tries to connect to AMQP, it will automatically use the value in Ruote::Amqp.session (else it will set up a new connection).
+
+The receivers expect a queue when they are set up, feel free to set Ruote::Amqp.session, then use it when instantiating receivers (the participant will follow suit).
+
+If you want a different way of connecting to AMQP for the participants, you can override their #amqp_connect methods (or pass them AMQP connection settings when registering them).
 
 
 ## requirements

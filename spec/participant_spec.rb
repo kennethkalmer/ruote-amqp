@@ -266,5 +266,33 @@ describe Ruote::Amqp::Participant do
 
     msgs.size.should == 1
   end
+
+  it 'uses Ruote::Amqp.session if set for connecting to AMQP' do
+
+    Ruote::Amqp.session = 'fail!'
+
+    @dashboard.register(
+      :toto,
+      Ruote::Amqp::Participant,
+      :exchange => [ 'direct', '' ],
+      :routing_key => 'alpha',
+      :forget => true)
+
+    pdef = Ruote.define do
+      toto
+    end
+
+    wfid = @dashboard.launch(pdef)
+    r = @dashboard.wait_for(wfid)
+
+    r['action'].should == 'error_intercepted'
+
+    r['error']['class'].should ==
+      'NoMethodError'
+    r['error']['message'].should ==
+      "undefined method `auto_recovering?' for \"fail!\":String"
+
+    Ruote::Amqp.session = nil
+  end
 end
 
