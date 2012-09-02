@@ -25,7 +25,7 @@ AMQP participant/listener pair for ruote
   ]
 
   s.add_runtime_dependency 'amqp', '~> 0.9'
-  s.add_runtime_dependency 'ruote', '>= 2.2.1'
+  s.add_runtime_dependency 'ruote', ">= #{s.version}"
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 2.8'
