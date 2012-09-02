@@ -66,8 +66,33 @@ See the AlertParticipant rdoc for more.
 
 Receiving messages.
 
+A receiver is a ruote service subscribed to a queue. When a message comes on
+the queue, the receiver will look at it and, according to the payload, either
+launch a new workflow instance, resume a currently workflow instance segment
+or pass an error back from a participant to the engine.
+
+(In fact the resume workflow / pass participant error back to the engine are
+closely related)
+
+(NTS: at some point, receivers should be able to deal with "cancel messages")
+
 ```ruby
-# TODO
+# A simple coupling between participant "toto" and a receiver via AMQP
+#
+# A real world example would have toto publishing somewhere, the message
+# getting fetched by the real (remote) participant and then handed back
+# on the queue the receiver is subscribed to.
+
+$dashboard.register(
+  :toto,
+  Ruote::Amqp::Participant,
+  :exchange => [ 'direct', '' ],
+  :routing_key => 'alpha')
+
+receiver = Ruote::Amqp::Receiver.new(
+  $dashboard, AMQP::Channel.new.queue('alpha'))
+
+# ...
 ```
 
 ### Controlling the connection (AMQP session)
