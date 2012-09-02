@@ -32,17 +32,39 @@ $dashboard.launch(pdef)
 # ...
 ```
 
+### Ruote::Amqp::AlertParticipant
+
+Ambushing messages from a process definition. The alert participant when
+receiving a workitem starts waiting for the next message on a given queue. When
+the message arrives, it responds to the engine (with a
+
+```ruby
+$dashboard.register(
+  :wait_for_info,
+  Ruote::Amqp::AlertParticipant,
+  :queue => 'info')
+
+pdef = Ruote.define do
+  # ... before
+  wait_for_job # flows wait for first message on 'info' queue
+  # ... after
+end
+```
+
+By default it waits for 1 message that it places in the "amqp_message" field
+of the workitem going back to the engine.
+
+One can override the #handle method to change the way the workitem is modified
+according to the message.
+
+It's also OK to override the #on_workitem method of this participant if one
+waits to wait for more than 1 message.
+
+See the AlertParticipant rdoc for more.
+
 ### Ruote::Amqp::Receiver
 
 Receiving messages.
-
-```ruby
-# TODO
-```
-
-### Ruote::Amqp::AlertParticipant
-
-Ambushing messages from a process definition.
 
 ```ruby
 # TODO
