@@ -12,9 +12,9 @@ Gem::Specification.new do |s|
   s.email = [ 'kenneth.kalmer@gmail.com', 'jmettraux@gmail.com' ]
   s.homepage = 'http://ruote.rubyforge.org'
   s.rubyforge_project = 'ruote'
-  s.summary = 'AMQP participant/listener pair for ruote'
+  s.summary = 'AMQP participant/receiver pair for ruote'
   s.description = %{
-AMQP participant/listener pair for ruote
+AMQP participant/receiver pair for ruote
   }
 
   #s.files = `git ls-files`.split("\n")
