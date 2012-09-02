@@ -28,5 +28,6 @@
 
 == FEEDBACK
 
+* Jim Li - https://github.com/marsbomber - auto_recovery and co
 * Marco Sehrer - https://github.com/pixelvitamina - ruote 2.2 vs 2.3
 
