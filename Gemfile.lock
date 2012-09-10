@@ -16,9 +16,10 @@ GIT
 PATH
   remote: .
   specs:
-    ruote-amqp (2.3.0)
-      amqp (~> 0.9)
-      ruote (>= 2.2.1)
+    ruote-amqp (2.3.0.1)
+      amqp (= 0.9.7)
+      eventmachine (= 0.12.10)
+      ruote (>= 2.3)
 
 GEM
   remote: http://rubygems.org/

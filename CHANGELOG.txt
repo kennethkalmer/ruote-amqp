@@ -2,6 +2,11 @@
 = ruote-amqp
 
 
+== ruote-amqp - 2.3.0.1    released 2012/09/10
+
+- pin amqp to 0.9.7 and eventmachine to 0.12.10
+
+
 == ruote-amqp - 2.3.0    released 2012/09/02
 
 - complete rework to better adhere to the AMQP philosophy
