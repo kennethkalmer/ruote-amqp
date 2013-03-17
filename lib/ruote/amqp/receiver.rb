@@ -153,6 +153,13 @@ module Ruote::Amqp
         else [ RemoteError, err.inspect ]
       end
 
+      if h['trace']
+        args << h.delete('trace')
+
+      elsif err['trace']
+        args << err['trace']
+      end
+
       super(h, *args)
     end
 
