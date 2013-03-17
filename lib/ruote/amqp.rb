@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2010-2012, Kenneth Kalmer, John Mettraux.
+# Copyright (c) 2010-2013, Kenneth Kalmer, John Mettraux.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
