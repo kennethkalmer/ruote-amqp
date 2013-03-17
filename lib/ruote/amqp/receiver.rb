@@ -147,18 +147,17 @@ module Ruote::Amqp
 
       err = h.delete('error')
 
-      args = case err
-        when String then [ RemoteError, err ]
-        when Hash then [ Ruote.constantize(err['class']), err['message'] ]
-        else [ RemoteError, err.inspect ]
-      end
-
-      if h['trace']
-        args << h.delete('trace')
-
-      elsif err['trace']
-        args << err['trace']
-      end
+      args =
+        case err
+          when String
+            [ RemoteError, err ]
+          when Hash
+            as = [ Ruote.constantize(err['class']), err['message'] ]
+            as << err['trace'] if err['trace']
+            as
+          else
+            [ RemoteError, err.inspect ]
+        end
 
       super(h, *args)
     end
