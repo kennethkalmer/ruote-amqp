@@ -47,7 +47,7 @@ describe Ruote::Amqp::Participant do
 
     r['action'].should == 'terminated'
 
-    sleep 0.1
+    sleep 0.350
 
     wi['participant_name'].should == 'toto'
   end
