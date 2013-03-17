@@ -12,6 +12,7 @@
 
 == CONTRIBUTORS
 
+* Islam Amer - https://github.com/iamer
 * Jiří Kubíček - https://github.com/kubicek
 * Mario Camou
 * Sean Johnson - https://github.com/belucid

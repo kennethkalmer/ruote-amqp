@@ -156,6 +156,26 @@ describe Ruote::Amqp::Receiver do
         r['error']['message'].should == 'something missing'
       end
 
+      it 'propagates errors passed back as hashes (+trace)' do
+
+        @dashboard.register_participant(
+          'alf',
+          ParticipantWithError,
+          'error' => {
+            'class' => 'ArgumentError',
+            'message' => 'something missing',
+            'trace' => %w[ aaa bbb ccc ] })
+
+        wfid = @dashboard.launch(Ruote.define { alf })
+        r = @dashboard.wait_for(wfid)
+
+        r['action'].should == 'error_intercepted'
+
+        r['error']['class'].should == 'ArgumentError'
+        r['error']['message'].should == 'something missing'
+        r['error']['trace'].should == %w[ aaa bbb ccc ]
+      end
+
       it 'propagates errors passed back as whatever' do
 
         @dashboard.register_participant(
