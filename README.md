@@ -1,4 +1,3 @@
-
 # ruote-amqp
 
 ruote-amqp is a set of classes that let a ruote engine publish and/or receive messages over AMQP.
@@ -46,7 +45,7 @@ $dashboard.register(
 
 pdef = Ruote.define do
   # ... before
-  wait_for_job # flows wait for first message on 'info' queue
+  wait_for_info # flows wait for first message on 'info' queue
   # ... after
 end
 ```
@@ -103,8 +102,8 @@ AMQP::Session instances).
 ```ruby
 # (before registering participants)
 
-Ruote::Amqp.session = AMQP.connect(:auto_recovery => true) do |con|
-  con.on_recovery do |con|
+Ruote::Amqp.session = AMQP.connect(:auto_recovery => true) do |connection|
+  connection.on_recovery do |con|
     puts "Recovered..."
   end
   connection.on_tcp_connection_loss do |con, settings|
