@@ -1,3 +1,4 @@
+
 # ruote-amqp
 
 ruote-amqp is a set of classes that let a ruote engine publish and/or receive messages over AMQP.
@@ -10,6 +11,10 @@ Listening for arbitrary AMQP messages before resuming a flow (ambush/alert) is a
 
 
 ## usage
+
+For a tiny example that shows the engine communicating by bouncing a message on an AMQP look, see [kindjal.rb](examples/kindjal.rb).
+
+Here are the two Participant classes and the Receiver classes offered by ruote-amqp:
 
 ### Ruote::Amqp::Participant
 
@@ -108,7 +113,7 @@ Ruote::Amqp.session = AMQP.connect(:auto_recovery => true) do |connection|
   end
   connection.on_tcp_connection_loss do |con, settings|
     puts "Reconnecting... please wait"
-    conn.reconnect(false, 20)
+    con.reconnect(false, 20)
   end
 end
 ```
@@ -122,9 +127,9 @@ If you want a different way of connecting to AMQP for the participants, you can 
 
 ## requirements
 
-* ruote[http://ruote.rubyforge.org] 2.3.0 or later
-* amqp[http://rubyamqp.info/] 0.9.0 or later
-* rabbitmq[http://www.rabbitmq.com/] 2.2.0 or later
+* [ruote](http://ruote.rubyforge.org) 2.3.0 or later
+* [amqp](http://rubyamqp.info/) 0.9.0 or later
+* [rabbitmq](http://www.rabbitmq.com/) 2.2.0 or later
 
 
 ## install
