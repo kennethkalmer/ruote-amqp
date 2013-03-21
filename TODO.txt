@@ -14,3 +14,6 @@
 [ ] incorporate
     https://github.com/marsbomber/ruote-amqp/commit/0f36a41f4a0254847a7b9a7c4b2098c8164f21f3
 
+[ ] :message => proc(workitem), general opt => proc
+    :exchange too?
+

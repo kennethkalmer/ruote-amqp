@@ -16,9 +16,12 @@ For a tiny example that shows the engine communicating by bouncing a message on 
 
 Here are the two Participant classes and the Receiver classes offered by ruote-amqp:
 
+
 ### Ruote::Amqp::Participant
 
-Publishing messages
+Publishing messages.
+
+This participant, upon receiving a workitem, posts a message on an AMQP exchange. By default it just turns the workitem to JSON and uses that string as the message. Feel free to subclass this participant to change that, or just pass a :message option.
 
 ```ruby
 $dashboard.register(
@@ -35,6 +38,9 @@ $dashboard.launch(pdef)
 
 # ...
 ```
+
+The [source](lib/ruote/amqp/participant.rb).
+
 
 ### Ruote::Amqp::AlertParticipant
 
@@ -64,7 +70,8 @@ according to the message.
 It's also OK to override the #on_workitem method of this participant if one
 waits to wait for more than 1 message.
 
-See the AlertParticipant rdoc for more.
+The [source](lib/ruote/amqp/alert_participant.rb).
+
 
 ### Ruote::Amqp::Receiver
 
@@ -98,6 +105,9 @@ receiver = Ruote::Amqp::Receiver.new(
 
 # ...
 ```
+
+The [source](lib/ruote/amqp/receiver.rb).
+
 
 ### Controlling the connection (AMQP session)
 
