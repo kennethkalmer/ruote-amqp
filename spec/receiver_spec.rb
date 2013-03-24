@@ -137,6 +137,9 @@ describe Ruote::Amqp::Receiver do
 
         r['error']['class'].should == 'Ruote::Amqp::RemoteError'
         r['error']['message'].should == 'something went wrong'
+
+        ps = @dashboard.ps(wfid)
+        ps.errors.size.should == 1
       end
 
       it 'propagates errors passed back as hashes' do
@@ -154,6 +157,9 @@ describe Ruote::Amqp::Receiver do
 
         r['error']['class'].should == 'ArgumentError'
         r['error']['message'].should == 'something missing'
+
+        ps = @dashboard.ps(wfid)
+        ps.errors.size.should == 1
       end
 
       it 'propagates errors passed back as hashes (+trace)' do
@@ -174,6 +180,9 @@ describe Ruote::Amqp::Receiver do
         r['error']['class'].should == 'ArgumentError'
         r['error']['message'].should == 'something missing'
         r['error']['trace'].should == %w[ aaa bbb ccc ]
+
+        ps = @dashboard.ps(wfid)
+        ps.errors.size.should == 1
       end
 
       it 'propagates errors passed back as whatever' do
@@ -188,6 +197,9 @@ describe Ruote::Amqp::Receiver do
 
         r['error']['class'].should == 'Ruote::Amqp::RemoteError'
         r['error']['message'].should == %w[ not good ].inspect
+
+        ps = @dashboard.ps(wfid)
+        ps.errors.size.should == 1
       end
     end
   end
