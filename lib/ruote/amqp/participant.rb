@@ -278,8 +278,11 @@ module Ruote::Amqp
     #
     def encode_cancelitem
 
+      fei = @fei.h
+      fei = fei.to_h if fei.respond_to?(:to_h)
+
       Rufus::Json.encode(
-        'cancel' => true, 'fei' => @fei.h, 'flavour' => @flavour)
+        'cancel' => true, 'fei' => fei, 'flavour' => @flavour)
     end
 
     # Default AMQP.connect method.
