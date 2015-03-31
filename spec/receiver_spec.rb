@@ -50,7 +50,7 @@ describe Ruote::Amqp::Receiver do
       wi['error'] = @options['error']
 
       exchange = AMQP::Exchange.new(AMQP::Channel.new, :direct, '')
-      exchange.publish(Rufus::Json.encode(wi), :routing_key => 'alpha')
+      exchange.publish(Rufus::Json.encode(wi.to_h), :routing_key => 'alpha')
 
       # no replying to the engine
     end
