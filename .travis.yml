@@ -11,3 +11,4 @@ matrix:
   allow_failures:
     - rvm: 2.2
 services: rabbitmq
+sudo: false
