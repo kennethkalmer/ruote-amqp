@@ -24,12 +24,12 @@ AMQP participant/receiver pair for ruote
     '*.gemspec', '*.txt', '*.rdoc', '*.md'
   ]
 
-  s.add_runtime_dependency 'eventmachine', '0.12.10'
   s.add_runtime_dependency 'amqp', '0.9.7'
   s.add_runtime_dependency 'ruote', ">= #{s.version.to_s.split('.')[0, 3].join('.')}"
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 2.8'
+  s.add_development_dependency 'eventmachine', '0.12.10'
 
   s.require_path = 'lib'
 end
