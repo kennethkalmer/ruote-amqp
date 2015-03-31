@@ -29,7 +29,7 @@ AMQP participant/receiver pair for ruote
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 2.8'
-  s.add_development_dependency 'eventmachine', '0.12.10'
+  s.add_development_dependency 'eventmachine', '>= 0.12.10', '< 1.1'
 
   s.require_path = 'lib'
 end

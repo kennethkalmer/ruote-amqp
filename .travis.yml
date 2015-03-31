@@ -7,8 +7,5 @@ rvm:
   - 2.0
   - 2.1
   - 2.2
-matrix:
-  allow_failures:
-    - rvm: 2.2
 services: rabbitmq
 sudo: false
